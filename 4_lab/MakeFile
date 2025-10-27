@@ -1,0 +1,16 @@
+CXX = g++
+CXXFLAGS = -std=c++14
+TARGET = 4_lab
+SOURCES = main.cpp \
+          ..\3_lab\c_plus_labs\.vscode\inheritence\BookCard.cpp \
+          ..\3_lab\c_plus_labs\.vscode\inheritence\IndependentPublicationCard.cpp \
+          ..\3_lab\c_plus_labs\.vscode\inheritence\LibraryCard.cpp \
+          ..\3_lab\c_plus_labs\.vscode\inheritence\Article.cpp
+
+$(TARGET): $(SOURCES)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SOURCES)
+
+clean:
+	del $(TARGET).exe
+
+.PHONY: clean
