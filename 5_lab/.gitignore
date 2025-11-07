@@ -1,0 +1,12 @@
+# CLion IDE 
+.idea/ 
+ 
+# CMake build directories 
+cmake-build-*/ 
+ 
+# CMake files 
+CMakeLists.txt 
+ 
+# Keep only main.cpp 
+!main.cpp 
+
