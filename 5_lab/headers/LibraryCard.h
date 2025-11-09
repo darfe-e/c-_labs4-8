@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include "D:\study\2_year\pnaiavy\c-_labs4-8\5_lab\exceptions/func_with_exc.h"
 
 class LibraryCard
 {

@@ -11,7 +11,7 @@ protected:
     std::string publisher;          // Название издательства или издающей организации
     int yearOfPublication;          // Год публикации издания
     int circulation;                // Тираж издания (количество экземпляров)
-    int pagesNamber;                // Количество страниц в издании (опечатка в названии - должно быть pagesNumber)
+    int pagesNamber;                // Количество страниц в издании
 
 public:
     IndependentPublicationCard() : LibraryCard(), publisher(""), yearOfPublication(0),      // Конструктор по умолчанию - инициализирует все поля нулевыми значениями

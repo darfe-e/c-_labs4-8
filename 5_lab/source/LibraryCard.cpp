@@ -50,19 +50,19 @@ std::ostream& operator<< (std::ostream& os, const LibraryCard& libraryCard)
 std::istream& operator>> (std::istream& is, LibraryCard& libraryCard)
 {
     std::cout << "\nВведите название карты: ";           // Приглашение для ввода названия карточки
-    std::getline(is, libraryCard.title);           // Чтение всей строки названия карточки
+    libraryCard.title = input_title(is);           // Чтение всей строки названия карточки
 
     std::cout << "Введите имя автора: ";                 // Приглашение для ввода имени автора
-    std::getline(is, libraryCard.author);          // Чтение всей строки имени автора
+    libraryCard.author = input_author(is);
 
     std::cout << "Авторский знак: ";                     // Приглашение для ввода авторского знака
-    std::getline(is, libraryCard.authorMark);      // Чтение всей строки авторского знака
+    libraryCard.authorMark = input_single_word(is, "authorMark");      // Чтение всей строки авторского знака
 
     std::cout << "Инвентарный номер: ";                  // Приглашение для ввода инвентарного номера
-    std::getline(is, libraryCard.inventoryNumber); // Чтение всей строки инвентарного номера
+    libraryCard.inventoryNumber = input_word_with_hyphen(is, "inventoryNumber"); // Чтение всей строки инвентарного номера
 
     std::cout << "Код по тематическому каталогу: ";      // Приглашение для ввода тематического кода
-    std::getline(is, libraryCard.thematicCode);    // Чтение всей строки тематического кода
+    libraryCard.thematicCode = input_single_word(is, "thematicCode");    // Чтение всей строки тематического кода
 
     return is;                                           // Возврат потока для поддержки цепочки ввода
 }
