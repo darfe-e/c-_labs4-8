@@ -50,3 +50,57 @@ std::istream& operator>>(std::istream& is, Article& article)          // Дру�
     return is;                                                      // Возврат потока для поддержки цепочки ввода
 }
 
+std::fstream& operator<<(std::fstream& fs, const Article& article)
+{
+    size_t len = article.getTitle().length();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    fs.write(article.getTitle().c_str(), len);
+
+    len = article.getAuthorName().length();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    fs.write(article.getAuthorName().c_str(), len);
+
+    return fs;
+}
+
+// Бинарный ввод для Article
+std::fstream& operator>>(std::fstream& fs, Article& article)
+{
+    size_t len;
+    char* buffer;
+
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    buffer = new char[len + 1];
+    fs.read(buffer, len);
+    buffer[len] = '\0';
+    article.setTitle(buffer);
+    delete[] buffer;
+
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    buffer = new char[len + 1];
+    fs.read(buffer, len);
+    buffer[len] = '\0';
+    article.setAuthorName(buffer);
+    delete[] buffer;
+
+    return fs;
+}
+
+// Текстовый вывод для Article
+std::ofstream& operator<<(std::ofstream& ofs, const Article& article)
+{
+    ofs << article.getTitle() << "\n";
+    ofs << article.getAuthorName() << "\n";
+    return ofs;
+}
+
+// Текстовый ввод для Article
+std::ifstream& operator>>(std::ifstream& ifs, Article& article)
+{
+    std::string title, author;
+    std::getline(ifs, title);
+    std::getline(ifs, author);
+    article.setTitle(title);
+    article.setAuthorName(author);
+    return ifs;
+}

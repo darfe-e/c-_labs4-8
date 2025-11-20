@@ -31,6 +31,11 @@ public:
     friend std::ostream& operator<<(std::ostream& os, ArticleCard& card);     // Дружественная функция: вывод объекта в поток
     friend std::istream& operator>>(std::istream& is, ArticleCard& card);     // Дружественная функция: ввод объекта из потока
 
+    friend std::fstream& operator<<(std::fstream& fs, const ArticleCard& card);
+    friend std::fstream& operator>>(std::fstream& fs, ArticleCard& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const ArticleCard& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, ArticleCard& card);
+
     virtual void menu () override;                                            // Переопределенный метод: отображение меню операций для карточки статьи
     void hat (std::ostream &os) override;                                     // Переопределение метода отоюражения шапки таблицы
 };

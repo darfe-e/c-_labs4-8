@@ -2,6 +2,7 @@
 #define LIBRARYCARD_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <iomanip>
 #include "D:\study\2_year\pnaiavy\c-_labs4-8\5_lab\exceptions/func_with_exc.h"
@@ -54,6 +55,10 @@ public:
     friend std::ostream& operator<< (std::ostream& os, const LibraryCard& libraryCard);  // Дружественная функция для вывода в поток
     friend std::istream& operator>> (std::istream& is, LibraryCard& libraryCard);        // Дружественная функция для ввода из потока
 
+    friend std::fstream& operator<<(std::fstream& fs, const LibraryCard& card);
+    friend std::fstream& operator>>(std::fstream& fs, LibraryCard& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const LibraryCard& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, LibraryCard& card);
 };
 
 

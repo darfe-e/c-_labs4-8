@@ -1,3 +1,4 @@
+#include <sstream>
 #include "..\headers\LibraryCard.h"
 
 LibraryCard::LibraryCard(std::string title, std::string author, std::string authorMark,
@@ -102,4 +103,150 @@ bool LibraryCard::operator==(const std::string& value) const
 bool LibraryCard::operator==(const char* value) const
 {
     return operator==(std::string(value));
+}
+// Бинарный вывод
+std::fstream& operator<<(std::fstream& fs, const LibraryCard& card)
+{
+    // Записываем длину каждой строки + данные
+    size_t len = card.title.size();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        fs.write(card.title.c_str(), len);
+    }
+
+    len = card.author.size();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        fs.write(card.author.c_str(), len);
+    }
+
+    len = card.authorMark.size();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        fs.write(card.authorMark.c_str(), len);
+    }
+
+    len = card.inventoryNumber.size();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        fs.write(card.inventoryNumber.c_str(), len);
+    }
+
+    len = card.thematicCode.size();
+    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        fs.write(card.thematicCode.c_str(), len);
+    }
+
+    return fs;
+}
+
+// Бинарный ввод
+std::fstream& operator>>(std::fstream& fs, LibraryCard& card)
+{
+    size_t len;
+
+    // Проверяем, есть ли данные для чтения
+    if (fs.peek() == EOF) {
+        fs.setstate(std::ios::eofbit);
+        return fs;
+    }
+
+    // Читаем title
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (fs.fail() || fs.eof()) {
+        fs.setstate(std::ios::failbit);
+        return fs;
+    }
+    card.title.resize(len);
+    if (len > 0) {
+        fs.read(&card.title[0], len);
+        if (fs.fail() || fs.eof()) {
+            fs.setstate(std::ios::failbit);
+            return fs;
+        }
+    }
+
+    // Читаем author
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (fs.fail() || fs.eof()) {
+        fs.setstate(std::ios::failbit);
+        return fs;
+    }
+    card.author.resize(len);
+    if (len > 0) {
+        fs.read(&card.author[0], len);
+        if (fs.fail() || fs.eof()) {
+            fs.setstate(std::ios::failbit);
+            return fs;
+        }
+    }
+
+    // Читаем authorMark
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (fs.fail() || fs.eof()) {
+        fs.setstate(std::ios::failbit);
+        return fs;
+    }
+    card.authorMark.resize(len);
+    if (len > 0) {
+        fs.read(&card.authorMark[0], len);
+        if (fs.fail() || fs.eof()) {
+            fs.setstate(std::ios::failbit);
+            return fs;
+        }
+    }
+
+    // Читаем inventoryNumber
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (fs.fail() || fs.eof()) {
+        fs.setstate(std::ios::failbit);
+        return fs;
+    }
+    card.inventoryNumber.resize(len);
+    if (len > 0) {
+        fs.read(&card.inventoryNumber[0], len);
+        if (fs.fail() || fs.eof()) {
+            fs.setstate(std::ios::failbit);
+            return fs;
+        }
+    }
+
+    // Читаем thematicCode
+    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (fs.fail() || fs.eof()) {
+        fs.setstate(std::ios::failbit);
+        return fs;
+    }
+    card.thematicCode.resize(len);
+    if (len > 0) {
+        fs.read(&card.thematicCode[0], len);
+        if (fs.fail() || fs.eof()) {
+            fs.setstate(std::ios::failbit);
+            return fs;
+        }
+    }
+
+    return fs;
+}
+// Текстовый вывод
+std::ofstream& operator<<(std::ofstream& ofs, const LibraryCard& card)
+{
+    ofs << card.title << "\n";
+    ofs << card.author << "\n";
+    ofs << card.authorMark << "\n";
+    ofs << card.inventoryNumber << "\n";
+    ofs << card.thematicCode << "\n";
+    return ofs;
+}
+
+// Текстовый ввод
+std::ifstream& operator>>(std::ifstream& ifs, LibraryCard& card)
+{
+    std::getline(ifs, card.title);
+    std::getline(ifs, card.author);
+    std::getline(ifs, card.authorMark);
+    std::getline(ifs, card.inventoryNumber);
+    std::getline(ifs, card.thematicCode);
+    return ifs;
 }

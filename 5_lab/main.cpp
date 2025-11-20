@@ -1,9 +1,4 @@
 #include "library_manager.h"
-#include "D:\study\2_year\pnaiavy\3_lab\c_plus_labs\.vscode\inheritence\IndependentPublicationCard.h"
-#include "D:\study\2_year\pnaiavy\3_lab\c_plus_labs\.vscode\inheritence\BookCard.h"
-#include "D:\study\2_year\pnaiavy\3_lab\c_plus_labs\.vscode\inheritence\ArticleCard.h"
-#include "headers/binryTree.h"
-#include "headers/ArticleCollectionCard.h"
 #include <windows.h>
 
 int main()
@@ -16,11 +11,11 @@ int main()
 
     while (true)
     {
-        std::cout << "\n\nНажмите Enter для продолжения...";  // Пауза перед очисткой экрана
-        std::cin.get(); system("cls");               // Ожидание нажатия Enter, Очистка консоли (Windows команда)
+        std::cout << "\n\nНажмите Enter для продолжения...";
+        std::cin.get(); system("cls");
 
         std::cout << "\nГлавное меню:\n";
-        std::cout << "\n1. Работа с деревом ArticleCollectionTree\n";
+        std::cout << "\n1. Работа с деревом ArticleCollectionCard\n";
         std::cout << "2. Работа с деревом BookCard\n";
         std::cout << "3. Работа с деревом ArticleCard\n";
         std::cout << "4. Выход\n\n";
@@ -33,29 +28,26 @@ int main()
             std::cout << "Неверный ввод. Пожалуйста, введите число.\n";
             continue;
         }
-        std::cin.get(); system("cls");               // Ожидание нажатия Enter, Очистка консоли (Windows команда)
+        std::cin.get(); system("cls");
 
         switch (mainChoice)
         {
             case 1:
             {
-                auto comparator = choose_comparator<ArticleCollectionCard>("ArticleCollectionCard");
-                binaryTree<ArticleCollectionCard> ArticleCollectionTree(comparator);
-                handleTreeOperations(ArticleCollectionTree, "ArticleCollectionCard");
+                LibraryManager<ArticleCollectionCard> manager("ArticleCollectionCard");
+                manager.run();
                 break;
             }
             case 2:
             {
-                auto comparator = choose_comparator<BookCard>("BookCard");
-                binaryTree<BookCard> BookTree(comparator);
-                handleTreeOperations(BookTree, "BookCard");
+                LibraryManager<BookCard> manager("BookCard");
+                manager.run();
                 break;
             }
             case 3:
             {
-                auto comparator = choose_comparator<ArticleCard>("ArticleCard");
-                binaryTree<ArticleCard> ArticleTree(comparator);
-                handleTreeOperations(ArticleTree, "ArticleCard");
+                LibraryManager<ArticleCard> manager("ArticleCard");
+                manager.run();
                 break;
             }
             case 4:

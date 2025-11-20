@@ -3,11 +3,11 @@
 
 #include "my_exception.h"
 
-class input_exception : public my_exception
+class input_exception : public my_exception                     // Проверка ввода
 {
 public:
     input_exception(const std::string& message, int error_code)
-            : my_exception(message, error_code)                                                             // Инициализация базового класса
+            : my_exception(message, error_code)                 // Инициализация базового класса
     {}
 };
 

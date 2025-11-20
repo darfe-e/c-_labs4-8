@@ -2,6 +2,7 @@
 #define ARTICLE_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <iomanip>
 
@@ -31,6 +32,11 @@ public:
 
     friend std::ostream& operator<< (std::ostream& os, const Article& article);     // Дружественная функция вывода в поток
     friend std::istream& operator>>(std::istream& is, Article& article);            // Дружественная функция ввода из потока
+
+    friend std::fstream& operator<<(std::fstream& fs, const Article& card);
+    friend std::fstream& operator>>(std::fstream& fs, Article& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const Article& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, Article& card);
 
     void hat(std::ostream &os);                                                     // Метод для вывода заголовка таблицы статьи
 };

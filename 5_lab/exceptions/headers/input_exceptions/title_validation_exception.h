@@ -3,11 +3,11 @@
 
 #include "input_exception.h"
 
-class title_validation_exception : public input_exception
+class title_validation_exception : public input_exception                  // Проверка названия
 {
 public:
     title_validation_exception(const std::string& message, int error_code)
-            : input_exception(message, error_code)                                                          // Инициализация базового класса
+            : input_exception(message, error_code)                         // Инициализация базового класса
     {}
 };
 

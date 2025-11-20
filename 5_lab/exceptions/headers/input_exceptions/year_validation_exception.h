@@ -3,11 +3,11 @@
 
 #include "input_exception.h"
 
-class year_validation_exception : public input_exception
+class year_validation_exception : public input_exception                  // Проверка года
 {
 public:
     year_validation_exception(const std::string& message, int error_code)
-            : input_exception(message, error_code)                                                          // Инициализация базового класса
+            : input_exception(message, error_code)                        // Инициализация базового класса
     {}
 };
 

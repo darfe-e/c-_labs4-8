@@ -34,6 +34,11 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const ArticleCollectionCard& card);  // Дружественная функция: вывод объекта в поток
     friend std::istream& operator>>(std::istream& is, ArticleCollectionCard& card);        // Дружественная функция: ввод объекта из потока
 
+    friend std::fstream& operator<<(std::fstream& fs, const ArticleCollectionCard& card);
+    friend std::fstream& operator>>(std::fstream& fs, ArticleCollectionCard& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const ArticleCollectionCard& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, ArticleCollectionCard& card);
+
     void hat (std::ostream &os) override;                          // Переопределенный метод: вывод заголовков таблицы для сборника статей
     virtual void menu () override;                                 // Переопределенный метод: отображение меню операций для сборника статей
 };

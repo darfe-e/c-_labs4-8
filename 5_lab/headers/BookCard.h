@@ -31,6 +31,10 @@ public:
     bool operator==(int value) const;
 
 
+    friend std::fstream& operator<<(std::fstream& fs, const BookCard& card);
+    friend std::fstream& operator>>(std::fstream& fs, BookCard& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const BookCard& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, BookCard& card);
 
     friend std::ostream& operator<<(std::ostream& os, BookCard& card);  // Дружественная функция: вывод объекта в поток
     friend std::istream& operator>>(std::istream& is, BookCard& card);  // Дружественная функция: ввод объекта из потока

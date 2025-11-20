@@ -43,6 +43,11 @@ public:
     friend std::ostream& operator<< (std::ostream& os, const IndependentPublicationCard& card);   // Дружественная функция для вывода в поток
     friend std::istream& operator>> (std::istream& is, IndependentPublicationCard& card);         // Дружественная функция для ввода из потока
 
+    friend std::fstream& operator<<(std::fstream& fs, const IndependentPublicationCard& card);
+    friend std::fstream& operator>>(std::fstream& fs, IndependentPublicationCard& card);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const IndependentPublicationCard& card);
+    friend std::ifstream& operator>>(std::ifstream& ifs, IndependentPublicationCard& card);
+
     virtual void hat(std::ostream &os) override;          // Переопределенный виртуальный метод для вывода заголовка таблицы
 
     virtual void menu () override;                        // Переопределенный виртуальный метод для отображения меню
