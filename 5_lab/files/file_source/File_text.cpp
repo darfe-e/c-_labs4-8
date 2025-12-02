@@ -1,100 +1,87 @@
 #include "..\file_headers\File_text.h"
 
+
 template<class T>
-File_text<T>::File_text(const std::string& name) : File(name) {}
+File_text<T>::File_text(const std::string& name) : File(name)
+{
+    validate_text_file_extension(file_name);
+}
 
 template<class T>
 File_text<T>::~File_text()
 {
-    if(file_i.is_open())
-        file_i.close();
-    if(file_o.is_open())
-        file_o.close();
+    Close_in();
+    Close_out();
 }
 
 template<class T>
-bool File_text<T>::Open_file_in()
+void File_text<T>::Open_file_in()
 {
-    file_i.open(file_name, std::ios::in);
-    return file_i.is_open();
+    if (file_i.is_open()) file_i.close();
+    safe_open_for_read(file_i, file_name);
 }
 
 template<class T>
-bool File_text<T>::Open_file_out()
+void File_text<T>::Open_file_out()
 {
-    file_o.open(file_name, std::ios::out);
-    return file_o.is_open();
+    if (file_o.is_open()) file_o.close();
+    safe_open_for_write(file_o, file_name);
 }
 
 template<class T>
-void File_text<T>::Remote()
+void File_text<T>::Close_in()
 {
-    if(file_i.is_open())
-    {
-        file_i.seekg(0, std::ios::beg);
-        file_i.clear();
-    }
-    if(file_o.is_open())
-    {
-        file_o.seekp(0, std::ios::beg);
-        file_o.clear();
-    }
+    if (file_i.is_open()) file_i.close();
 }
 
 template<class T>
-bool File_text<T>::R_end_file()
+void File_text<T>::Close_out()
 {
-    return file_i.eof();
+    if (file_o.is_open()) file_o.close();
 }
 
 template<class T>
 void File_text<T>::Write_string_line(const std::string& str)
 {
-    if (!file_o.is_open()) {
-        throw std::runtime_error("File stream for writing is not open.");
-    }
-    // Используем std::endl для записи строки и перехода на новую строку
+    check_file_opened_for_write(file_o, file_name);
     file_o << str << std::endl;
+
+    check_write_success(file_o, file_name, "строки");
 }
 
-// НОВЫЙ МЕТОД: Чтение строки (для заголовка типа)
 template<class T>
 void File_text<T>::Read_string_line(std::string& str)
 {
-    if (!file_i.is_open()) {
-        throw std::runtime_error("File stream for reading is not open.");
-    }
+    check_file_opened_for_read(file_i, file_name);
+    check_not_end_of_file(file_i, file_name);
 
-    // Проверяем, не достигнут ли EOF перед чтением
-    if (file_i.peek() == EOF) {
-        throw std::runtime_error("End of file reached when trying to read string.");
-    }
-
-    // Читаем всю строку
     std::getline(file_i, str);
 
-    if (file_i.fail() && !file_i.eof()) {
-        throw std::runtime_error("Failed to read string line from file.");
-    }
-    // Если поток в состоянии eof после чтения, это нормально.
+    check_read_success(file_i, file_name, "строки");
 }
 
 template<class T>
 void File_text<T>::Write_record_in_file_text(T& OBJECT)
 {
+    check_file_opened_for_write(file_o, file_name);
+
     const T& obj = OBJECT;
     file_o << obj;
+
+    check_write_success(file_o, file_name, "объекта");
 }
 
 template<class T>
 void File_text<T>::Read_record_in_file_text(T& OBJECT)
 {
+    check_file_opened_for_read(file_i, file_name);
+    check_not_end_of_file(file_i, file_name);
+
     file_i >> OBJECT;
-    if (file_i.fail() && file_i.eof()) {
-        throw std::runtime_error("End of file reached");
-    }
+    check_read_success(file_i, file_name, "объекта");
 }
 
+// Реализации операторов
 template<class T>
 File_text<T>& File_text<T>::operator<<(T& obj)
 {
@@ -112,50 +99,27 @@ File_text<T>& File_text<T>::operator>>(T& obj)
 template<class T>
 File_text<T>& File_text<T>::operator<<(const std::string& str)
 {
-    if (!file_o.is_open()) {
-        throw std::runtime_error("File stream for writing is not open.");
-    }
-    // Запись строки
-    file_o << str;
-    if (file_o.fail()) {
-        throw std::runtime_error("Failed to write std::string to file.");
-    }
+    Write_string_line(str);
     return *this;
 }
-
 
 template<class T>
 File_text<T>& File_text<T>::operator<<(const char* const str)
 {
-    if (!file_o.is_open()) {
-        throw std::runtime_error("File stream for writing is not open.");
-    }
-    // Запись C-строки
+    check_file_opened_for_write(file_o, file_name);
     file_o << str;
-    if (file_o.fail()) {
-        throw std::runtime_error("Failed to write C-string to file (e.g., newline).");
-    }
+    check_write_success(file_o, file_name, "C-строки");
+
     return *this;
 }
 
 template<class T>
 File_text<T>& File_text<T>::operator>>(std::string& str)
 {
-    if (!file_i.is_open()) {
-        throw std::runtime_error("File stream for reading is not open.");
-    }
-
-    file_i.clear(); // Сброс флагов перед чтением
-
-    if (!(file_i >> str)) {
-        if (file_i.eof()) {
-            throw std::runtime_error("End of file reached when trying to read string.");
-        }
-        throw std::runtime_error("Failed to read string token from file.");
-    }
-
+    Read_string_line(str);
     return *this;
 }
+
 
 template class File_text<BookCard>;
 template class File_text<ArticleCard>;

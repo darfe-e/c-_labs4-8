@@ -59,6 +59,10 @@ public:
     friend std::fstream& operator>>(std::fstream& fs, LibraryCard& card);
     friend std::ofstream& operator<<(std::ofstream& ofs, const LibraryCard& card);
     friend std::ifstream& operator>>(std::ifstream& ifs, LibraryCard& card);
+
+    static void write_string_binary(std::fstream& fs, const std::string& str);
+    static std::fstream& read_string_binary(std::fstream& fs, std::string& str);
+
 };
 
 

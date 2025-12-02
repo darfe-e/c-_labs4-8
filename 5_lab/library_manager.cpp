@@ -15,9 +15,8 @@ void LibraryManager<T>::_displayMenu() const
     std::cout << "\033[36m" << "\n\nНажмите Enter для продолжения..." << "\033[0m";
     std::cin.get();
     system("cls");
-    std::cout << "\033[35m" << "\n=== РАБОТА С " << className << " ===" << "\033[0m"
-              << "\033[33m"
-              << "\n\n1. Добавить карточку"
+    std::cout  << "\n=== РАБОТА С " << className << " ==="
+              << "\n1. Добавить карточку"
               << "\n2. Найти карточку по нескольким полям"
               << "\n3. Вывести отсортированное по возрастанию дерево"
               << "\n4. Вывести отсортированное по убыванию дерево"
@@ -26,20 +25,21 @@ void LibraryManager<T>::_displayMenu() const
               << "\n7. Поиск по условию (find_if)"
               << "\n8. Операции с файлами"
               << "\n9. Вернуться в главное меню"
-              << "\033[0m"
-              << "\033[32m" << "\n\nВаш выбор: " << "\033[0m";
+               << "\n\nВаш выбор: ";
 }
 
 template<class T>
 int LibraryManager<T>::_getUserChoice()
 {
     int choice;
-    if (!(std::cin >> choice))
+    std::cin >> choice;
+    if (std::cin.fail())
     {
         std::cin.clear();
-        std::cin.ignore(1000, '\n');
+        std::cin.ignore(10000, '\n');
         throw std::runtime_error("Неверный ввод. Пожалуйста, введите число.");
     }
+    std::cin.ignore(10000, '\n'); // Очищаем буфер после ввода числа
     return choice;
 }
 
@@ -58,7 +58,7 @@ void LibraryManager<T>::run()
         }
         catch (const std::exception& e)
         {
-            std::cout << "\033[31m" << e.what() << "\033[0m" << std::endl;
+            std::cout  << e.what()  << std::endl;
         }
 
     } while (choice != 9);
@@ -72,80 +72,86 @@ void LibraryManager<T>::_processChoice(int choice)
         case 1: // Добавить карточку
         {
             T card;
-            std::cin.ignore();
-            std::cout << "\033[36m" << "\n=== ДОБАВЛЕНИЕ КАРТОЧКИ ===" << "\033[0m" << std::endl;
+            std::cout  << "\n=== ДОБАВЛЕНИЕ КАРТОЧКИ ==="  << std::endl;
 
             try
             {
                 std::cin >> card;
                 tree.push(card);
-                std::cout << "\033[32m" << "\nКарточка успешно добавлена!" << "\033[0m" << std::endl;
+                std::cout << " Карточка успешно добавлена!" << std::endl;
             }
             catch (const author_validation_exception& e)
             {
-                std::cout << "\033[31m" << e.get_error_code() << ": Ошибка ввода автора: " << e.what() << "\033[0m" << std::endl;
+                std::cout  << e.get_error_code() << ": Ошибка ввода автора: " << e.what()  << std::endl;
             }
             catch (const title_validation_exception& e)
             {
-                std::cout << "\033[31m" << e.get_error_code() << ": Ошибка ввода названия: " << e.what() << "\033[0m" << std::endl;
+                std::cout  << e.get_error_code() << ": Ошибка ввода названия: " << e.what()  << std::endl;
             }
             catch (const word_validation_exception& e)
             {
-                std::cout << "\033[31m" << e.get_error_code() << ": Ошибка ввода данных: " << e.what() << "\033[0m" << std::endl;
-            }
-            catch (const year_validation_exception& e)
-            {
-                std::cout << "\033[31m" << e.get_error_code() << ": Ошибка ввода года: " << e.what() << "\033[0m" << std::endl;
+                std::cout  << e.get_error_code() << ": Ошибка ввода данных: " << e.what()  << std::endl;
             }
             catch (const number_validation_exception& e)
             {
-                std::cout << "\033[31m" << e.get_error_code() << ": Ошибка ввода числового значения: " << e.what() << "\033[0m" << std::endl;
+                std::cout << e.get_error_code() << ": Ошибка ввода числового значения: " << e.what()  << std::endl;
             }
             catch (const std::exception& e)
             {
-                std::cout << "\033[31m" << "\nОшибка при добавлении карточки: " << e.what() << "\033[0m" << std::endl;
+                std::cout  << " Ошибка при добавлении карточки: " << e.what()  << std::endl;
             }
+
+            std::cout  << "\nНажмите Enter для продолжения..." ;
+            std::cin.get();
             break;
         }
 
         case 2: // Поиск по образцу
         {
             auto search_template = _create_search_template();
-            bool has_search_criteria = _has_criterias(search_template);
 
-            if (!has_search_criteria)
+            if (!search_template.hasCriteria())
             {
-                std::cout << "\033[31m" << "\nНе задано ни одного критерия поиска!" << "\033[0m" << std::endl;
+                std::cout << "Не задано ни одного критерия поиска!"  << std::endl;
                 break;
             }
 
             auto result = _search_by_template(search_template);
             if (result)
             {
-                std::cout << "\033[32m" << "\nНайдено!" << "\033[0m" << std::endl;
+                std::cout << "Найдено!" << std::endl;
                 std::cout << result->getData() << std::endl;
             }
             else
-                std::cout << "\033[31m" << "\nНе найдено!" << "\033[0m" << std::endl;
+            {
+                std::cout << "Не найдено!" << std::endl;
+            }
+
+            std::cout << "\nНажмите Enter для продолжения..." ;
+            std::cin.get();
             break;
         }
 
         case 3: // Вывод по возрастанию
         {
-            std::cout << "\033[36m" << "\nДерево (по возрастанию):" << "\033[0m" << std::endl;
+            std::cout  << "\n=== ДЕРЕВО (ПО ВОЗРАСТАНИЮ) ===" << std::endl;
             T card;
             card.hat(std::cout);
             tree.printSortedAscending();
+
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
 
         case 4: // Вывод по убыванию
         {
-            std::cout << "\033[36m" << "\nДерево (по убыванию):" << "\033[0m" << std::endl;
+            std::cout << "\n=== ДЕРЕВО (ПО УБЫВАНИЮ) ==="  << std::endl;
             T card;
             card.hat(std::cout);
             tree.printSortedDescending();
+
+            std::cout<< "\nНажмите Enter для продолжения..." ;
             std::cin.get();
             break;
         }
@@ -155,11 +161,10 @@ void LibraryManager<T>::_processChoice(int choice)
             try
             {
                 auto search_template = _create_search_template();
-                bool has_search_criteria = _has_criterias(search_template);
 
-                if (!has_search_criteria)
+                if (!search_template.hasCriteria())
                 {
-                    std::cout << "\033[31m" << "\nНе задано ни одного критерия поиска!" << "\033[0m" << std::endl;
+                    std::cout<< "Не задано ни одного критерия поиска!" << std::endl;
                     break;
                 }
 
@@ -167,34 +172,40 @@ void LibraryManager<T>::_processChoice(int choice)
                 if (result)
                 {
                     tree.remove(result->getData());
-                    std::cout << "\033[32m" << "Узел удален!" << "\033[0m" << std::endl;
+                    std::cout  << " Узел удален!"<< std::endl;
                 }
                 else
-                    std::cout << "\033[31m" << "Узел не найден!" << "\033[0m" << std::endl;
+                {
+                    std::cout  << " Узел не найден!"  << std::endl;
+                }
             }
             catch (const std::exception& e)
             {
-                std::cout << "\033[31m" << "\nОшибка при удалении узла: " << e.what() << "\033[0m" << std::endl;
+                std::cout  << "Ошибка при удалении узла: " << e.what()  << std::endl;
             }
+
+            std::cout << "\nНажмите Enter для продолжения..." ;
             std::cin.get();
             break;
         }
 
         case 6: // Вывод дерева в pre-order
         {
-            std::cout << "\033[36m" << "\nДерево (pre-order):" << "\033[0m" << std::endl;
+            std::cout  << "\n=== ДЕРЕВО (PRE-ORDER) ===" << std::endl;
             T card;
             card.hat(std::cout);
             tree.printTree();
+
+            std::cout  << "\nНажмите Enter для продолжения..." ;
             std::cin.get();
             break;
         }
 
         case 7: // Поиск по любому полю
         {
-            std::cout << "\033[36m" << "\nВведите значение для поиска по любому полу: " << "\033[0m";
+            std::cout  << "\n=== ПОИСК ПО ЛЮБОМУ ПОЛЮ ==="  << std::endl;
+            std::cout  << "Введите значение для поиска: ";
             std::string searchValue;
-            std::cin.ignore();
             std::getline(std::cin, searchValue);
 
             auto result = tree.find_if([&searchValue](const T& card)
@@ -214,23 +225,32 @@ void LibraryManager<T>::_processChoice(int choice)
                                                if (independentCard && independentCard->getPublisher() == searchValue)
                                                    return true;
 
-                                               int numValue = std::stoi(searchValue);
-                                               if (independentCard && (independentCard->getYearOfPublication() == numValue ||
-                                                                       independentCard->getCirculation() == numValue ||
-                                                                       independentCard->getPagesNamber() == numValue))
-                                                   return true;
+                                               try
+                                               {
+                                                   int numValue = std::stoi(searchValue);
+                                                   if (independentCard && (independentCard->getYearOfPublication() == numValue ||
+                                                                           independentCard->getCirculation() == numValue ||
+                                                                           independentCard->getPagesNamber() == numValue))
+                                                       return true;
+                                               }
+                                               catch (const std::exception&) {
+                                                   // Игнорируем ошибки преобразования строки в число
+                                               }
                                            }
                                            return false;
                                        });
 
             if (result)
             {
-                std::cout << "\033[32m" << "\nНайдено!\n" << "\033[0m";
+                std::cout  << " Найдено!"  << std::endl;
                 std::cout << result->getData() << std::endl;
             }
             else
-                std::cout << "\033[31m" << "\nНе найдено!" << "\033[0m" << std::endl;
+            {
+                std::cout  << " Не найдено!"  << std::endl;
+            }
 
+            std::cout  << "\nНажмите Enter для продолжения..." ;
             std::cin.get();
             break;
         }
@@ -241,32 +261,41 @@ void LibraryManager<T>::_processChoice(int choice)
             do
             {
                 system("cls");
-                std::cout << "\033[35m" << "\n=== ОПЕРАЦИИ С ФАЙЛАМИ ===" << "\033[0m"
-                          << "\033[33m"
-                          << "\n\n1. Запись в текстовый файл"
+                std::cout << "\n=== ОПЕРАЦИИ С ФАЙЛАМИ ===" << "\033[0m"
+                          << "\n1. Запись в текстовый файл"
                           << "\n2. Чтение из текстового файла"
                           << "\n3. Запись в бинарный файл"
                           << "\n4. Чтение из бинарного файла"
-                          << "\n5. Возврат в меню " << className
-                          << "\033[0m"
-                          << "\033[32m" << "\n\nВаш выбор: " << "\033[0m";
+                          << "\n5. Возврат в меню " << className << "\n\nВаш выбор: \033[0m";
 
                 fileChoice = _getUserChoice();
 
                 switch(fileChoice)
                 {
-                    case 1: _writeToTextFile(); break;
-                    case 2: _readFromTextFile(); break;
-                    case 3: _writeToBinaryFile(); break;
-                    case 4: _readFromBinaryFile(); break;
-                    case 5: break;
-                    default: std::cout << "\033[31m" << "Неверный выбор!" << "\033[0m" << std::endl;
+                    case 1:
+                        _writeToTextFile();
+                        break;
+                    case 2:
+                        _readFromTextFile();
+                        break;
+                    case 3:
+                        _writeToBinaryFile();
+                        break;
+                    case 4:
+                        _readFromBinaryFile();
+                        break;
+                    case 5:
+                        std::cout  << "Возврат в меню " << className << "..." << std::endl;
+                        break;
+                    default:
+                        std::cout  << "Неверный выбор!"  << std::endl;
                 }
 
                 if (fileChoice != 5)
                 {
-                    std::cout << "\033[36m" << "\nНажмите Enter для продолжения..." << "\033[0m";
-                    std::cin.ignore();
+                    std::cout << "\033[36m" << "\n\nНажмите Enter для продолжения..." << "\033[0m";
+                    std::cin.get();
+
                     std::cin.get();
                 }
 
@@ -275,12 +304,15 @@ void LibraryManager<T>::_processChoice(int choice)
         }
 
         case 9: // Выход в главное меню
-            std::cout << "\033[34m" << "Возврат в главное меню..." << "\033[0m" << std::endl;
+            std::cout  << " Возврат в главное меню..." << std::endl;
             std::cin.get();
             break;
 
         default:
-            std::cout << "\033[31m" << "Неверный выбор!" << "\033[0m" << std::endl;
+            std::cout  <<  "Неверный выбор!" << std::endl;
+            std::cout  << "\nНажмите Enter для продолжения..." ;
+            std::cin.get();
+            break;
     }
 }
 
@@ -289,9 +321,8 @@ template<class T>
 std::function<bool(const T&, const T&)> LibraryManager<T>::_choose_comparator()
 {
     int sortChoice;
-    std::cout << "\033[36m" << "\n=== ВЫБОР ПОЛЯ ДЛЯ СОРТИРОВКИ ===" << "\033[0m" << std::endl;
-    std::cout << "\033[33m"
-              << "\n1. По названию (по умолчанию)"
+    std::cout << "\n=== ВЫБОР ПОЛЯ ДЛЯ СОРТИРОВКИ ==="  << std::endl;
+    std::cout << "\n1. По названию (по умолчанию)"
               << "\n2. По автору"
               << "\n3. По инвентарному номеру"
               << "\n4. По тематическому коду";
@@ -304,14 +335,14 @@ std::function<bool(const T&, const T&)> LibraryManager<T>::_choose_comparator()
                   << "\n8. По количеству страниц";
     }
 
-    std::cout << "\033[0m"
-              << "\033[32m" << "\n\nВаш выбор: " << "\033[0m";
+    std::cout
+               << "\n\nВаш выбор: ";
 
     if (!(std::cin >> sortChoice))
     {
         std::cin.clear();
         std::cin.ignore(1000, '\n');
-        std::cout << "\033[31m" << "Неверный ввод. Используется сортировка по названию.\n" << "\033[0m";
+        std::cout  << "Неверный ввод. Используется сортировка по названию.\n" ;
         return [](const T& a, const T& b) { return a.getTitle() < b.getTitle(); };
     }
 
@@ -381,18 +412,18 @@ std::function<bool(const T&, const T&)> LibraryManager<T>::_choose_comparator()
             break;
     }
 
-    std::cout << "\033[31m" << "Неверный выбор. Используется сортировка по названию.\n" << "\033[0m";
+    std::cout << "Неверный выбор. Используется сортировка по названию.\n";
     return [](const T& a, const T& b) { return a.getTitle() < b.getTitle(); };
 }
 
 template<class T>
-T LibraryManager<T>::_create_search_template()
+SearchTemplate LibraryManager<T>::_create_search_template()
 {
-    T search_template;
+    SearchTemplate search_template;
     std::cin.ignore();
 
-    std::cout << "\033[36m" << "\n=== СОЗДАНИЕ ОБРАЗЦА ДЛЯ ПОИСКА ===" << "\033[0m" << std::endl;
-    std::cout << "\033[33m" << "Заполните поля для поиска (оставьте пустыми или 0 для пропуска):" << "\033[0m" << std::endl;
+    std::cout << "\n=== СОЗДАНИЕ ОБРАЗЦА ДЛЯ ПОИСКА ===" <<std::endl;
+    std::cout << "Заполните поля для поиска (оставьте пустыми или 0 для пропуска):" << std::endl;
 
     std::cout << "Введите название (оставьте пустым для пропуска): ";
     std::string title;
@@ -419,47 +450,44 @@ T LibraryManager<T>::_create_search_template()
     std::getline(std::cin, thematic);
     search_template.setThematicCode(thematic);
 
-    if (auto* indCard = dynamic_cast<IndependentPublicationCard*>(&search_template))
-    {
+    // Для производных классов добавляем дополнительные поля
+    if (className != "ArticleCard") {
         std::cout << "Введите год издания (0 для пропуска): ";
         std::string yearStr;
         std::getline(std::cin, yearStr);
-        try
-        {
-            indCard->setYearOfPublication(std::stoi(yearStr));
-        }
-        catch (...)
-        {
-            std::cout << "\033[33m" << "Поле будет пропущено" << "\033[0m" << std::endl;
+        try {
+            if (!yearStr.empty()) {
+                search_template.setYearOfPublication(std::stoi(yearStr));
+            }
+        } catch (...) {
+            std::cout << "Некорректный год, поле будет пропущено" << std::endl;
         }
 
         std::cout << "Введите издателя (оставьте пустым для пропуска): ";
         std::string publisher;
         std::getline(std::cin, publisher);
-        indCard->setPublisher(publisher);
+        search_template.setPublisher(publisher);
 
         std::cout << "Введите тираж (0 для пропуска): ";
         std::string circulationStr;
         std::getline(std::cin, circulationStr);
-        try
-        {
-            indCard->setCirculation(std::stoi(circulationStr));
-        }
-        catch (...)
-        {
-            std::cout << "\033[33m" << "Поле будет пропущено" << "\033[0m" << std::endl;
+        try {
+            if (!circulationStr.empty()) {
+                search_template.setCirculation(std::stoi(circulationStr));
+            }
+        } catch (...) {
+            std::cout  << "Некорректный тираж, поле будет пропущено" << std::endl;
         }
 
         std::cout << "Введите количество страниц (0 для пропуска): ";
         std::string pagesStr;
         std::getline(std::cin, pagesStr);
-        try
-        {
-            indCard->setPagesNamber(std::stoi(pagesStr));
-        }
-        catch (...)
-        {
-            std::cout << "\033[33m" << "Поле будет пропущено" << "\033[0m" << std::endl;
+        try {
+            if (!pagesStr.empty()) {
+                search_template.setPagesNamber(std::stoi(pagesStr));
+            }
+        } catch (...) {
+            std::cout  << "Некорректное количество страниц, поле будет пропущено" << std::endl;
         }
     }
 
@@ -467,74 +495,51 @@ T LibraryManager<T>::_create_search_template()
 }
 
 template<class T>
-treeNode<T>* LibraryManager<T>::_search_by_template(const T& search_template)
+treeNode<T>* LibraryManager<T>::_search_by_template(const SearchTemplate& search_template)
 {
-    // Явно захватываем this для вызова метода класса
-    return tree.find_if([this, &search_template](const T& card)
-                        {
-                            if (!search_template.getTitle().empty() && card.getTitle() != search_template.getTitle())
-                                return false;
-                            if (!search_template.getAuthor().empty() && card.getAuthor() != search_template.getAuthor())
-                                return false;
-                            if (!search_template.getInventoryNumber().empty() && card.getInventoryNumber() != search_template.getInventoryNumber())
-                                return false;
-                            if (!search_template.getThematicCode().empty() && card.getThematicCode() != search_template.getThematicCode())
-                                return false;
+    return tree.find_if([&search_template, this](const T& card) {
+        // Проверка базовых полей LibraryCard
+        if (!search_template.getTitle().empty() && card.getTitle() != search_template.getTitle())
+            return false;
+        if (!search_template.getAuthor().empty() && card.getAuthor() != search_template.getAuthor())
+            return false;
+        if (!search_template.getAuthorMark().empty() && card.getAuthorMark() != search_template.getAuthorMark())
+            return false;
+        if (!search_template.getInventoryNumber().empty() && card.getInventoryNumber() != search_template.getInventoryNumber())
+            return false;
+        if (!search_template.getThematicCode().empty() && card.getThematicCode() != search_template.getThematicCode())
+            return false;
 
-                            if (dynamic_cast<const ArticleCard*>(&card) != nullptr)
-                                return true;
+        // Для ArticleCard поиск завершается на базовых полях
+        if (dynamic_cast<const ArticleCard*>(&card) != nullptr)
+            return true;
 
-                            return this->_search_chosen(search_template, card);
-                        });
+        // Проверка полей IndependentPublicationCard
+        return this->_search_independent_fields(search_template, card);
+    });
 }
 
 template<class T>
-bool LibraryManager<T>::_has_criterias(const T& search_template)
+bool LibraryManager<T>::_search_independent_fields(const SearchTemplate& search_template, const T& card)
 {
-    bool has_search_criteria = !search_template.getTitle().empty() ||
-                               !search_template.getAuthor().empty() ||
-                               !search_template.getInventoryNumber().empty() ||
-                               !search_template.getThematicCode().empty();
-
-    if (!(className == "ArticleCard"))
-    {
-        // Используем const_cast для временного снятия константности
-        const IndependentPublicationCard* indCard = dynamic_cast<const IndependentPublicationCard*>(&search_template);
-        if (indCard)
-        {
-            has_search_criteria = has_search_criteria || indCard->getYearOfPublication() != 0;
-            has_search_criteria = has_search_criteria || indCard->getCirculation() != 0;
-            has_search_criteria = has_search_criteria || indCard->getPagesNamber() != 0;
-            has_search_criteria = has_search_criteria || !indCard->getPublisher().empty();
-        }
-    }
-
-    return has_search_criteria;
-}
-
-template<class T>
-bool LibraryManager<T>::_search_chosen(const T& templateIndependent, const T& independentCard)
-{
-    const IndependentPublicationCard* templateInd = dynamic_cast<const IndependentPublicationCard*>(&templateIndependent);
-    const IndependentPublicationCard* indCard = dynamic_cast<const IndependentPublicationCard*>(&independentCard);
-
-    if (!templateInd || !indCard)
+    const IndependentPublicationCard* indCard = dynamic_cast<const IndependentPublicationCard*>(&card);
+    if (!indCard)
         return true;
 
-    if (!templateInd->getPublisher().empty() &&
-        indCard->getPublisher() != templateInd->getPublisher())
+    if (!search_template.getPublisher().empty() &&
+        indCard->getPublisher() != search_template.getPublisher())
         return false;
 
-    if (templateInd->getYearOfPublication() != 0 &&
-        indCard->getYearOfPublication() != templateInd->getYearOfPublication())
+    if (search_template.getYearOfPublication() != 0 &&
+        indCard->getYearOfPublication() != search_template.getYearOfPublication())
         return false;
 
-    if (templateInd->getCirculation() != 0 &&
-        indCard->getCirculation() != templateInd->getCirculation())
+    if (search_template.getCirculation() != 0 &&
+        indCard->getCirculation() != search_template.getCirculation())
         return false;
 
-    if (templateInd->getPagesNamber() != 0 &&
-        indCard->getPagesNamber() != templateInd->getPagesNamber())
+    if (search_template.getPagesNamber() != 0 &&
+        indCard->getPagesNamber() != search_template.getPagesNamber())
         return false;
 
     return true;
@@ -547,66 +552,42 @@ void LibraryManager<T>::_writeToTextFile()
     {
         std::string filename;
         std::cout << "\033[36m" << "Введите имя текстового файла: " << "\033[0m";
-        std::cin.ignore();
         std::getline(std::cin, filename);
 
         File_text<T> file_txt(filename);
-
-        // 1. Получаем строковый ID типа
         std::string type_id = _get_card_type_string();
+
         if (type_id == "UNKNOWN_CARD")
-            throw std::runtime_error("Unknown card type mapping for manager: " + className);
+            throw std::runtime_error("Неизвестный тип карточки для менеджера: " + className);
 
-        // Открытие файла для записи (перезаписывает, если существует)
-        if (!file_txt.Open_file_out())
+        file_txt.Open_file_out();
+
+        std::vector<T> sortedData = tree.getSortedAscending();
+        if (sortedData.empty())
         {
-            throw file_open_exception("Не удалось открыть текстовый файл для записи: " + filename, FILE_OPEN_ERROR);
+            std::cout << "\033[33m" << "Нет данных для записи" << "\033[0m" << std::endl;
+            return;
         }
 
-        try
-        {
-            // Получаем все элементы в отсортированном порядке
-            std::vector<T> sortedData = tree.getSortedAscending();
+        file_txt << type_id;
 
-            if (sortedData.empty()) {
-                std::cout << "\033[33m" << "Нет данных для записи" << "\033[0m" << std::endl;
-                return;
-            }
+        for (auto& card : sortedData)
+            file_txt.Write_record_in_file_text(card);
 
-            // ЗАПИСЬ: Первой строкой записываем ID типа для всего файла
-            // ПРЕДПОЛОЖЕНИЕ: File_text<T> перегружает оператор << для std::string и добавляет разделитель (например, newline).
-            file_txt << type_id << "\n";
-
-            // Записываем все карточки в файл
-            for (auto& card : sortedData)
-            {
-                file_txt.Write_record_in_file_text(card);
-            }
-
-            std::cout << "\033[32m" << "Данные успешно записаны в текстовый файл: " << filename
-                      << " (записанно " << sortedData.size() << " карточек)" << "\033[0m" << std::endl;
-        }
-        catch (const std::exception& e)
-        {
-            throw file_write_exception("Исключение при записи в текстовый файл: " + std::string(e.what()), FILE_WRITE_ERROR);
-        }
+        std::cout << "\033[32m" << "Данные успешно записаны в текстовый файл: " << filename
+                  << " (записано " << sortedData.size() << " карточек)" << "\033[0m" << std::endl;
     }
-        // ... (Обработка исключений - остается без изменений) ...
     catch (const file_open_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка открытия файла: " << e.what() << "\033[0m" << std::endl;
     }
-    catch (const file_write_exception& e)
+    catch (const file_access_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка записи: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const file_format_exception& e)
     {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата: " << e.what() << "\033[0m" << std::endl;
-    }
-    catch (const file_access_exception& e)
-    {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка доступа: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата файла: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const std::exception& e)
     {
@@ -621,119 +602,84 @@ void LibraryManager<T>::_readFromTextFile()
     {
         std::string filename;
         std::cout << "\033[36m" << "Введите имя текстового файла: " << "\033[0m";
-        std::cin.ignore();
         std::getline(std::cin, filename);
 
         File_text<T> file_txt(filename);
-
-        // 1. Получаем ожидаемый строковый ID типа
         std::string expected_type_id = _get_card_type_string();
 
-        if (!file_txt.Open_file_in())
-        {
-            throw file_open_exception("Не удалось открыть текстовый файл для чтения: " + filename, FILE_OPEN_ERROR);
-        }
+        file_txt.Open_file_in();
 
-        try
-        {
-            // 2. ИСПРАВЛЕНИЕ: Используем Read_string_line для чтения всего заголовка.
-            std::string file_type_id;
-            file_txt.Read_string_line(file_type_id); // Этот метод должен прочитать заголовок и перейти на следующую строку.
+        std::string file_type_id;
+        file_txt.Read_string_line(file_type_id);
 
-            if (file_type_id != expected_type_id)
-            {
-                throw FileTypeMismatchException(
-                        "Несоответствие типов данных в текстовом файле. Ожидался: " + expected_type_id +
-                        ", найден: " + file_type_id, FILE_FORMAT_ERROR);
-            }
-        }
-        catch (const FileTypeMismatchException&) { throw; } // Переброс нашей ошибки
-        catch (const std::runtime_error& e)
-        {
-            // Перехват "End of file reached when trying to read string."
-            if (std::string(e.what()).find("End of file") != std::string::npos) {
-                std::cout << "\033[33m" << "Файл пуст или содержит только заголовок." << "\033[0m" << std::endl;
-                return;
-            }
-            throw file_read_exception("Ошибка при чтении заголовка (типа карточки) файла: " + std::string(e.what()), FILE_READ_ERROR);
-        }
-        catch (const std::exception& e)
-        {
-            // Ошибка чтения ID типа (например, пустой файл)
-            throw file_read_exception("Ошибка при чтении заголовка (типа карточки) файла: " + std::string(e.what()), FILE_READ_ERROR);
-        }
-
+        if (file_type_id != expected_type_id)
+            throw file_format_exception(
+                    "Несоответствие типов данных. Ожидался: " + expected_type_id +
+                    ", найден: " + file_type_id, FILE_FORMAT_ERROR);
 
         int cardsAdded = 0;
+        bool hasError = false;
+        std::string errorMessage;
 
-        try
+        while (true)
         {
-            // Читаем данные из файла пока не достигнем конца
-            while (true)
+            T card;
+            try
             {
-                T card;
-
-                try
-                {
-                    // ВАЖНО: Read_record_in_file_text ДОЛЖЕН выбрасывать исключение на EOF.
-                    file_txt.Read_record_in_file_text(card);
-                }
-                catch (const std::runtime_error& e)
-                {
-                    // Предполагаем, что Read_record_in_file_text бросает исключение на EOF или ошибку
-                    std::string errorMsg = e.what();
-                    if (errorMsg.find("End of file") != std::string::npos ||
-                        errorMsg.find("end of file") != std::string::npos) {
-                        break; // Нормальный выход по концу файла
-                    } else {
-                        throw; // Проброс ошибки чтения
-                    }
-                }
-
-                try
-                {
-                    tree.push(card);
-                    cardsAdded++;
-                    std::cout << "\033[33m" << "Загружена карточка #" << cardsAdded << "\033[0m" << std::endl;
-                }
-                catch (const std::exception& e)
-                {
-                    std::cout << "\033[33m" << "Предупреждение: ошибка при добавлении карточки: " << e.what() << "\033[0m" << std::endl;
-                }
+                file_txt.Read_record_in_file_text(card);
+            }
+            catch (const std::runtime_error& e)
+            {
+                std::string errorMsg = e.what();
+                if (errorMsg.find("Конец файла") != std::string::npos ||
+                    errorMsg.find("end of file") != std::string::npos)
+                    break;
+                hasError = true;
+                errorMessage = e.what();
+                break;
+            }
+            catch (const std::exception& e)
+            {
+                hasError = true;
+                errorMessage = e.what();
+                break;
             }
 
-            if (cardsAdded > 0) {
-                std::cout << "\033[32m" << "Успешно загружено " << cardsAdded << " карточек из текстового файла: " << filename << "\033[0m" << std::endl;
-            } else {
-                std::cout << "\033[33m" << "Не загружено ни одной карточки из файла: " << filename << "\033[0m" << std::endl;
+            try
+            {
+                tree.push(card);
+                cardsAdded++;
+                std::cout << "\033[33m" << "Загружена карточка #" << cardsAdded << "\033[0m" << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << "\033[33m" << "Предупреждение: ошибка при добавлении карточки: " << e.what() << "\033[0m" << std::endl;
             }
         }
-        catch (const std::exception& e)
+
+        if (cardsAdded > 0)
         {
-            // Перехват ошибок чтения/формата
-            throw file_read_exception("Исключение при чтении текстового файла: " + std::string(e.what()), FILE_READ_ERROR);
+            std::cout << "\033[32m" << "Успешно загружено " << cardsAdded << " карточек из текстового файла: " << filename << "\033[0m" << std::endl;
+            if (hasError)
+                std::cout << "\033[33m" << "Предупреждение: " << errorMessage << "\033[0m" << std::endl;
+        }
+        else {
+            std::cout << "\033[33m" << "Не загружено ни одной карточки из файла: " << filename << "\033[0m" << std::endl;
+            if (hasError)
+                throw file_access_exception("Ошибка чтения файла: " + errorMessage, FILE_ACCESS_ERROR);
         }
     }
-        // ... (общая обработка исключений - остается без изменений) ...
     catch (const file_open_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка открытия файла: " << e.what() << "\033[0m" << std::endl;
     }
-    catch (const file_read_exception& e)
+    catch (const file_access_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка чтения: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const file_format_exception& e)
     {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата: " << e.what() << "\033[0m" << std::endl;
-    }
-    catch (const FileTypeMismatchException& e)
-    {
-        std::cout << "\033[31m" << "ОШИБКА ФОРМАТА: " << e.what() << "\033[0m" << std::endl;
-    }
-    catch (const file_access_exception& e)
-    {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка доступа: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата файла: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const std::exception& e)
     {
@@ -748,66 +694,46 @@ void LibraryManager<T>::_writeToBinaryFile()
     {
         std::string filename;
         std::cout << "\033[36m" << "Введите имя бинарного файла: " << "\033[0m";
-        std::cin.ignore();
         std::getline(std::cin, filename);
 
         File_binary<T> file_bin(filename);
 
-        // 1. Получаем ID типа для записи
         CardType expected_type = _get_card_type();
         if (expected_type == CardType::UNKNOWN)
-            throw std::runtime_error("Unknown card type mapping for manager: " + className);
+            throw std::runtime_error("Неизвестный тип карточки для менеджера: " + className);
 
         int type_code = static_cast<int>(expected_type);
+        std::vector<T> sortedData = tree.getSortedAscending();
 
-        try
+        if (sortedData.empty())
         {
-            // Очищаем файл перед записью
-            file_bin.Remote();
-
-            // Получаем все элементы в отсортированном порядке
-            std::vector<T> sortedData = tree.getSortedAscending();
-
-            if (sortedData.empty()) {
-                std::cout << "\033[33m" << "Нет данных для записи" << "\033[0m" << std::endl;
-                return;
-            }
-
-            // Записываем все карточки в файл
-            for (auto& card : sortedData)
-            {
-                // 2. ЗАПИСЬ: Сначала записываем int код типа
-                // ПРЕДПОЛОЖЕНИЕ: File_binary<T> перегружает оператор << для int и записывает его в поток.
-                file_bin << type_code;
-
-                // 3. Затем записываем саму карточку
-                file_bin.Write_record_in_file(card);
-            }
-
-            std::cout << "\033[32m" << "Данные успешно записаны в бинарный файл: " << filename
-                      << " (записанно " << sortedData.size() << " карточек)" << "\033[0m" << std::endl;
+            std::cout << "\033[33m" << "Нет данных для записи" << "\033[0m" << std::endl;
+            return;
         }
-        catch (const std::exception& e)
+
+        file_bin.Open_for_write();
+        file_bin.Clear_file();
+
+        for (auto& card : sortedData)
         {
-            throw file_write_exception("Исключение при записи в бинарный файл: " + std::string(e.what()), FILE_WRITE_ERROR);
+            file_bin << type_code;      // Записываем тип карточки
+            file_bin << card;           // Записываем саму карточку
         }
+
+        std::cout << "\033[32m" << "Данные успешно записаны в бинарный файл: " << filename
+                  << " (записано " << sortedData.size() << " карточек)" << "\033[0m" << std::endl;
     }
-        // ... (Обработка исключений - остается без изменений) ...
     catch (const file_open_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка открытия файла: " << e.what() << "\033[0m" << std::endl;
     }
-    catch (const file_write_exception& e)
+    catch (const file_access_exception& e)
     {
         std::cout << "\033[31m" << e.get_error_code() << ": Ошибка записи: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const file_format_exception& e)
     {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата: " << e.what() << "\033[0m" << std::endl;
-    }
-    catch (const file_access_exception& e)
-    {
-        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка доступа: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата файла: " << e.what() << "\033[0m" << std::endl;
     }
     catch (const std::exception& e)
     {
@@ -815,7 +741,6 @@ void LibraryManager<T>::_writeToBinaryFile()
     }
 }
 
-// ЧТЕНИЕ ИЗ БИНАРНОГО ФАЙЛА
 template<class T>
 void LibraryManager<T>::_readFromBinaryFile()
 {
@@ -823,102 +748,86 @@ void LibraryManager<T>::_readFromBinaryFile()
     {
         std::string filename;
         std::cout << "\033[36m" << "Введите имя бинарного файла: " << "\033[0m";
-        std::cin.ignore();
         std::getline(std::cin, filename);
 
         File_binary<T> file_bin(filename);
-
-        // 1. Получаем ID типа, который ожидаем прочитать
         CardType expected_type = _get_card_type();
-        if (expected_type == CardType::UNKNOWN) {
-            throw std::runtime_error("Unknown card type mapping for manager: " + className);
-        }
 
-        // --- ИСПРАВЛЕНИЕ: Открываем файл ОДИН РАЗ перед чтением ---
-        try
-        {
-            file_bin.Open_for_read();
-        }
-        catch (const std::runtime_error& e)
-        {
-            std::string errorMsg = e.what();
-            if (errorMsg.find("File is empty") != std::string::npos) {
-                std::cout << "\033[33m" << "Файл пуст" << "\033[0m" << std::endl;
-                return;
-            }
-            throw; // Пробрасываем другие ошибки открытия
-        }
-        // -----------------------------------------------------------
+        if (expected_type == CardType::UNKNOWN)
+            throw std::runtime_error("Неизвестный тип карточки для менеджера: " + className);
+
+        int expected_type_code = static_cast<int>(expected_type);
+        file_bin.Open_for_read();
 
         int cardsAdded = 0;
-        int expected_type_code = static_cast<int>(expected_type);
+        bool hasError = false;
+        std::string errorMessage;
 
-        // Цикл будет продолжаться, пока не будет брошено исключение
         while (true)
         {
-            T card;
-            int file_type_code = 0;
+            try {
+                T card;
+                int file_type_code = 0;
 
-            try
-            {
-                // 2. Считываем int код типа
-                // ПРЕДПОЛОЖЕНИЕ: File_binary<T> перегружает оператор >> для int.
                 file_bin >> file_type_code;
 
-                // Если оператор >> для int не смог прочитать данные, это может быть EOF.
-                // В зависимости от реализации File_binary, EOF может быть выброшен тут или на Read_record_in_file.
-                // Если поток в состоянии ошибки после попытки чтения int, это EOF или повреждение.
-                if (file_type_code == 0 && file_bin.R_end_file()) {
-                    break; // Нормальный выход по концу файла
-                }
-
-                // Проверяем код
                 if (file_type_code != expected_type_code)
-                {
-                    // Ошибка несоответствия типа данных
-                    throw FileTypeMismatchException(
-                            "Несоответствие типов данных в бинарном файле. Ожидался ID: " + std::to_string(expected_type_code) +
-                            ", найден ID: " + std::to_string(file_type_code), FILE_FORMAT_ERROR);
-                }
+                    throw file_format_exception(
+                            "Несоответствие типов данных. Ожидался ID: " +
+                            std::to_string(expected_type_code) + ", найден ID: " +
+                            std::to_string(file_type_code), FILE_FORMAT_ERROR);
 
-                // 3. Если код совпал, читаем сам объект
-                file_bin.Read_record_in_file(card);
+                file_bin >> card;
 
                 tree.push(card);
                 cardsAdded++;
                 std::cout << "\033[33m" << "Загружена карточка #" << cardsAdded << "\033[0m" << std::endl;
             }
-            catch (const FileTypeMismatchException& e)
+            catch (const std::runtime_error& e)
             {
-                std::cout << "\033[31m" << "ОШИБКА ТИПА ДАННЫХ В ФАЙЛЕ: " << e.what() << "\033[0m" << std::endl;
-                break; // Прерываем чтение
-            }
-            catch (const std::exception& e)
-            {
+                // Конец файла - нормальный выход
                 std::string errorMsg = e.what();
-
-                // Если это конец файла - это НОРМАЛЬНОЕ завершение цикла.
-                if (errorMsg.find("End of file reached") != std::string::npos || errorMsg.find("End of file") != std::string::npos) {
+                if (errorMsg.find("Конец файла") != std::string::npos ||
+                    errorMsg.find("end of file") != std::string::npos)
                     break;
-                }
-                    // Любое другое исключение чтения - это ошибка
-                else {
-                    std::cout << "\033[31m" << "Ошибка чтения: " << errorMsg << "\033[0m" << std::endl;
-                    break;
-                }
+                hasError = true;
+                errorMessage = e.what();
+                break;
+            }
+            catch (const file_format_exception& e)
+            {
+                std::cout << "\033[31m" << e.get_error_code() << ": " << e.what() << "\033[0m" << std::endl;
+                break;
             }
         }
 
-        if (cardsAdded > 0) {
-            std::cout << "\033[32m" << "Успешно загружено " << cardsAdded << " карточек из бинарного файла: " << filename << "\033[0m" << std::endl;
-        } else {
-            std::cout << "\033[33m" << "Не загружено ни одной карточки из файла: " << filename << "\033[0m" << std::endl;
+        if (cardsAdded > 0)
+        {
+            std::cout << "\033[32m" << "Успешно загружено " << cardsAdded
+                      << " карточек из бинарного файла: " << filename << "\033[0m" << std::endl;
+
+            if (hasError)
+                std::cout << "\033[33m" << "Предупреждение: " << errorMessage << "\033[0m" << std::endl;
         }
+        else
+            std::cout << "\033[33m" << "Не загружено ни одной карточки из файла: "
+                      << filename << "\033[0m" << std::endl;
     }
-        // ... (общая обработка исключений - остается без изменений) ...
+    catch (const file_open_exception& e)
+    {
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка открытия файла: " << e.what() << "\033[0m" << std::endl;
+    }
+    catch (const file_access_exception& e)
+    {
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка чтения: " << e.what() << "\033[0m" << std::endl;
+    }
+    catch (const file_format_exception& e)
+    {
+        std::cout << "\033[31m" << e.get_error_code() << ": Ошибка формата файла: " << e.what() << "\033[0m" << std::endl;
+    }
     catch (const std::exception& e)
     {
-        std::cout << "\033[31m" << "Ошибка при чтении бинарного файла: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[31m" << "Неизвестная ошибка при чтении бинарного файла: " << e.what() << "\033[0m" << std::endl;
     }
 }
 

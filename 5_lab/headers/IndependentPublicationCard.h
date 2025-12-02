@@ -51,6 +51,8 @@ public:
     virtual void hat(std::ostream &os) override;          // Переопределенный виртуальный метод для вывода заголовка таблицы
 
     virtual void menu () override;                        // Переопределенный виртуальный метод для отображения меню
+
+
 };
 
 #endif

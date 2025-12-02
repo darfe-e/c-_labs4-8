@@ -48,26 +48,6 @@ std::ostream& operator<< (std::ostream& os, const LibraryCard& libraryCard)
     return os;                                           // Возврат потока для поддержки цепочки вывода
 }
 
-std::istream& operator>> (std::istream& is, LibraryCard& libraryCard)
-{
-    std::cout << "\nВведите название карты: ";           // Приглашение для ввода названия карточки
-    libraryCard.title = input_title(is);           // Чтение всей строки названия карточки
-
-    std::cout << "Введите имя автора: ";                 // Приглашение для ввода имени автора
-    libraryCard.author = input_author(is);
-
-    std::cout << "Авторский знак: ";                     // Приглашение для ввода авторского знака
-    libraryCard.authorMark = input_single_word(is, "authorMark");      // Чтение всей строки авторского знака
-
-    std::cout << "Инвентарный номер: ";                  // Приглашение для ввода инвентарного номера
-    libraryCard.inventoryNumber = input_word_with_hyphen(is, "inventoryNumber"); // Чтение всей строки инвентарного номера
-
-    std::cout << "Код по тематическому каталогу: ";      // Приглашение для ввода тематического кода
-    libraryCard.thematicCode = input_single_word(is, "thematicCode");    // Чтение всей строки тематического кода
-
-    return is;                                           // Возврат потока для поддержки цепочки ввода
-}
-
 void LibraryCard::menu()
 {
     std::cout<<"\nLibraryCard menu:\n";                                                                  // Заголовок меню LibraryCard
@@ -104,131 +84,60 @@ bool LibraryCard::operator==(const char* value) const
 {
     return operator==(std::string(value));
 }
-// Бинарный вывод
-std::fstream& operator<<(std::fstream& fs, const LibraryCard& card)
+
+void LibraryCard::write_string_binary(std::fstream& fs, const std::string& str)
 {
-    // Записываем длину каждой строки + данные
-    size_t len = card.title.size();
+    size_t len = str.size();
     fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.title.c_str(), len);
-    }
-
-    len = card.author.size();
-    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.author.c_str(), len);
-    }
-
-    len = card.authorMark.size();
-    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.authorMark.c_str(), len);
-    }
-
-    len = card.inventoryNumber.size();
-    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.inventoryNumber.c_str(), len);
-    }
-
-    len = card.thematicCode.size();
-    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.thematicCode.c_str(), len);
-    }
-
-    return fs;
+    if (len > 0)
+        fs.write(str.c_str(), len);
 }
 
-// Бинарный ввод
-std::fstream& operator>>(std::fstream& fs, LibraryCard& card)
+std::fstream& LibraryCard::read_string_binary(std::fstream& fs, std::string& str)
 {
     size_t len;
-
-    // Проверяем, есть ли данные для чтения
-    if (fs.peek() == EOF) {
-        fs.setstate(std::ios::eofbit);
-        return fs;
-    }
-
-    // Читаем title
     fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
+    if (fs.fail() || fs.eof())
+    {
         fs.setstate(std::ios::failbit);
         return fs;
     }
-    card.title.resize(len);
-    if (len > 0) {
-        fs.read(&card.title[0], len);
-        if (fs.fail() || fs.eof()) {
+
+    str.resize(len);
+    if (len > 0)
+    {
+        fs.read(&str[0], len);
+        if (fs.fail() || fs.eof())
+        {
             fs.setstate(std::ios::failbit);
             return fs;
         }
     }
+    return fs;
+}
 
-    // Читаем author
-    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-    card.author.resize(len);
-    if (len > 0) {
-        fs.read(&card.author[0], len);
-        if (fs.fail() || fs.eof()) {
-            fs.setstate(std::ios::failbit);
-            return fs;
-        }
-    }
-
-    // Читаем authorMark
-    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-    card.authorMark.resize(len);
-    if (len > 0) {
-        fs.read(&card.authorMark[0], len);
-        if (fs.fail() || fs.eof()) {
-            fs.setstate(std::ios::failbit);
-            return fs;
-        }
-    }
-
-    // Читаем inventoryNumber
-    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-    card.inventoryNumber.resize(len);
-    if (len > 0) {
-        fs.read(&card.inventoryNumber[0], len);
-        if (fs.fail() || fs.eof()) {
-            fs.setstate(std::ios::failbit);
-            return fs;
-        }
-    }
-
-    // Читаем thematicCode
-    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-    card.thematicCode.resize(len);
-    if (len > 0) {
-        fs.read(&card.thematicCode[0], len);
-        if (fs.fail() || fs.eof()) {
-            fs.setstate(std::ios::failbit);
-            return fs;
-        }
-    }
+std::fstream& operator<<(std::fstream& fs, const LibraryCard& card)
+{
+    LibraryCard::write_string_binary(fs, card.title);
+    LibraryCard::write_string_binary(fs, card.author);
+    LibraryCard::write_string_binary(fs, card.authorMark);
+    LibraryCard::write_string_binary(fs, card.inventoryNumber);
+    LibraryCard::write_string_binary(fs, card.thematicCode);
 
     return fs;
 }
+
+std::fstream& operator>>(std::fstream& fs, LibraryCard& card)
+{
+    LibraryCard::read_string_binary(fs, card.title);
+    LibraryCard::read_string_binary(fs, card.author);
+    LibraryCard::read_string_binary(fs, card.authorMark);
+    LibraryCard::read_string_binary(fs, card.inventoryNumber);
+    LibraryCard::read_string_binary(fs, card.thematicCode);
+
+    return fs;
+}
+
 // Текстовый вывод
 std::ofstream& operator<<(std::ofstream& ofs, const LibraryCard& card)
 {
@@ -243,10 +152,31 @@ std::ofstream& operator<<(std::ofstream& ofs, const LibraryCard& card)
 // Текстовый ввод
 std::ifstream& operator>>(std::ifstream& ifs, LibraryCard& card)
 {
-    std::getline(ifs, card.title);
-    std::getline(ifs, card.author);
-    std::getline(ifs, card.authorMark);
-    std::getline(ifs, card.inventoryNumber);
-    std::getline(ifs, card.thematicCode);
+    card.title = input_title(ifs);
+    card.author = input_author(ifs);
+    card.authorMark = input_single_word(ifs, "authorMark");
+    card.inventoryNumber = input_word_with_hyphen(ifs, "inventoryNumber");
+    card.thematicCode = input_single_word(ifs, "thematicCode");
     return ifs;
+}
+
+std::istream& operator>> (std::istream& is, LibraryCard& libraryCard)
+{
+
+    std::cout << "\nВведите название карты: ";           // Приглашение для ввода названия карточки
+    libraryCard.title = input_title(is);              // Чтение всей строки названия карточки
+
+    std::cout << "Введите имя автора: ";                 // Приглашение для ввода имени автора
+    libraryCard.author = input_author(is);
+
+    std::cout << "Авторский знак: ";                     // Приглашение для ввода авторского знака
+    libraryCard.authorMark = input_single_word(is, "authorMark");      // Чтение всей строки авторского знака
+
+    std::cout << "Инвентарный номер: ";                  // Приглашение для ввода инвентарного номера
+    libraryCard.inventoryNumber = input_word_with_hyphen(is, "inventoryNumber"); // Чтение всей строки инвентарного номера
+
+    std::cout << "Код по тематическому каталогу: ";      // Приглашение для ввода тематического кода
+    libraryCard.thematicCode = input_single_word(is, "thematicCode");    // Чтение всей строки тематического кода
+
+    return is;                                           // Возврат потока для поддержки цепочки ввода
 }

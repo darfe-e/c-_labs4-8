@@ -1,3 +1,4 @@
+#include <chrono>
 #include "..\headers\IndependentPublicationCard.h"
 
 IndependentPublicationCard::IndependentPublicationCard(
@@ -59,24 +60,22 @@ std::ostream& operator<< (std::ostream& os, const IndependentPublicationCard& ca
 
 std::istream& operator>> (std::istream& is, IndependentPublicationCard& card)
 {
-    is >> static_cast<LibraryCard&>(card);              // Преобразование к базовому классу и ввод базовой части через оператор >> LibraryCard
+    is >> static_cast<LibraryCard&>(card);
 
     std::cout << "Введите издательство: ";
-    card.publisher = input_author(is);                                                              // Ввод и валидация издательства
+    card.publisher = input_author(is);
 
     std::cout << "Введите год издания: ";
-    card.yearOfPublication = input_year(is);                                                        // Ввод и валидация года издания
+    card.yearOfPublication = input_num(is, 1500, 2025);
 
     std::cout << "Введите тираж: ";
-    card.circulation = input_circulation(is);                                                       // Ввод и валидация тиража
+    card.circulation = input_num(is, 1, 10000000);
 
     std::cout << "Введите количество страниц: ";
-    card.pagesNamber = input_pages(is);                                        // Очистка буфера ввода после чтения числа
+    card.pagesNamber = input_num(is, 1, 10000);
 
-    return is;                                          // Возврат потока для поддержки цепочки ввода
+    return is;
 }
-
-
 
 void IndependentPublicationCard::menu ()
 {
@@ -113,18 +112,11 @@ bool IndependentPublicationCard::operator==(int value) const
             pagesNamber == value);
 }
 
-// Бинарный вывод
 std::fstream& operator<<(std::fstream& fs, const IndependentPublicationCard& card)
 {
-    // Сначала вызываем оператор базового класса
     fs << static_cast<const LibraryCard&>(card);
 
-    // Затем записываем дополнительные поля
-    size_t len = card.publisher.size();
-    fs.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    if (len > 0) {
-        fs.write(card.publisher.c_str(), len);
-    }
+    LibraryCard::write_string_binary(fs, card.publisher);
 
     fs.write(reinterpret_cast<const char*>(&card.yearOfPublication), sizeof(card.yearOfPublication));
     fs.write(reinterpret_cast<const char*>(&card.circulation), sizeof(card.circulation));
@@ -136,61 +128,36 @@ std::fstream& operator<<(std::fstream& fs, const IndependentPublicationCard& car
 // Бинарный ввод
 std::fstream& operator>>(std::fstream& fs, IndependentPublicationCard& card)
 {
-    // Сначала вызываем оператор базового класса
     fs >> static_cast<LibraryCard&>(card);
     if (fs.fail()) return fs;
 
-    // Затем читаем дополнительные поля
-    size_t len;
-
-    // Читаем publisher
-    fs.read(reinterpret_cast<char*>(&len), sizeof(len));
-    if (fs.fail() || fs.eof()) {
+    if (!LibraryCard::read_string_binary(fs, card.publisher))
+    {
         fs.setstate(std::ios::failbit);
         return fs;
     }
 
-    if (len > 0) {
-        std::vector<char> buffer(len + 1);
-        fs.read(buffer.data(), len);
-        if (fs.fail() || fs.eof()) {
-            fs.setstate(std::ios::failbit);
-            return fs;
-        }
-        buffer[len] = '\0';
-        card.publisher = buffer.data();
-    } else {
-        card.publisher.clear();
-    }
+    auto read_numeric = [&](auto& value) -> bool
+    {
+        fs.read(reinterpret_cast<char*>(&value), sizeof(value));
+        return !(fs.fail() || fs.eof());
+    };
 
-    // Читаем числовые поля
-    fs.read(reinterpret_cast<char*>(&card.yearOfPublication), sizeof(card.yearOfPublication));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-
-    fs.read(reinterpret_cast<char*>(&card.circulation), sizeof(card.circulation));
-    if (fs.fail() || fs.eof()) {
-        fs.setstate(std::ios::failbit);
-        return fs;
-    }
-
-    fs.read(reinterpret_cast<char*>(&card.pagesNamber), sizeof(card.pagesNamber));
-    if (fs.fail() || fs.eof()) {
+    if (!read_numeric(card.yearOfPublication) ||
+        !read_numeric(card.circulation) ||
+        !read_numeric(card.pagesNamber))
+    {
         fs.setstate(std::ios::failbit);
         return fs;
     }
 
     return fs;
 }
-// Текстовый вывод
+
 std::ofstream& operator<<(std::ofstream& ofs, const IndependentPublicationCard& card)
 {
-    // Сначала вызываем оператор базового класса
     ofs << static_cast<const LibraryCard&>(card);
 
-    // Затем записываем дополнительные поля
     ofs << card.publisher << "\n";
     ofs << card.yearOfPublication << "\n";
     ofs << card.circulation << "\n";
@@ -199,20 +166,15 @@ std::ofstream& operator<<(std::ofstream& ofs, const IndependentPublicationCard& 
     return ofs;
 }
 
-// Текстовый ввод
 std::ifstream& operator>>(std::ifstream& ifs, IndependentPublicationCard& card)
 {
-    // Сначала вызываем оператор базового класса
     ifs >> static_cast<LibraryCard&>(card);
 
-    // Затем читаем дополнительные поля
-    std::getline(ifs, card.publisher);
-    ifs >> card.yearOfPublication;
-    ifs.ignore(); // пропускаем \n
-    ifs >> card.circulation;
-    ifs.ignore();
-    ifs >> card.pagesNamber;
-    ifs.ignore();
+    card.publisher = input_author(ifs);                                                              // Ввод и валидация издательства
+    card.yearOfPublication = input_num(ifs, 1500, 2025);                                                        // Ввод и валидация года издания
+    card.circulation = input_num(ifs, 1, 10000000);                                                       // Ввод и валидация тиража
+    card.pagesNamber = input_num(ifs, 1, 10000);
+
 
     return ifs;
 }

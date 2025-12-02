@@ -69,55 +69,40 @@ bool BookCard::operator==(const BookCard& other) const
 
 bool BookCard::operator==(const std::string& value) const
 {
-    // Вызываем оператор == из базового класса
     return IndependentPublicationCard::operator==(value);
 }
 
 bool BookCard::operator==(const char* value) const
 {
-    // Вызываем оператор == из базового класса
     return IndependentPublicationCard::operator==(value);
 }
 
 bool BookCard::operator==(int value) const
 {
-    // Вызываем оператор == из базового класса
     return IndependentPublicationCard::operator==(value);
 }
 
 
-// Бинарный вывод
 std::fstream& operator<<(std::fstream& fs, const BookCard& card)
 {
-    // Вызываем оператор базового класса
     fs << static_cast<const IndependentPublicationCard&>(card);
     return fs;
 }
 
-// Бинарный ввод
 std::fstream& operator>>(std::fstream& fs, BookCard& card)
 {
-    // Вызываем оператор базового класса
     fs >> static_cast<IndependentPublicationCard&>(card);
     return fs;
 }
 
-// Текстовый вывод
 std::ofstream& operator<<(std::ofstream& ofs, const BookCard& card)
 {
     ofs << static_cast<const IndependentPublicationCard&>(card);
-
-    //ofs << card.article;
-
     return ofs;
 }
 
-// Текстовый ввод
 std::ifstream& operator>>(std::ifstream& ifs, BookCard& card)
 {
     ifs >> static_cast<IndependentPublicationCard&>(card);
-
-    //ifs >> card.article;
-
     return ifs;
 }

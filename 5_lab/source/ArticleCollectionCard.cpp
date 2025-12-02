@@ -108,15 +108,13 @@ void ArticleCollectionCard::menu()                            // Метод от
 // Бинарный вывод
 std::fstream& operator<<(std::fstream& fs, const ArticleCollectionCard& card)
 {
-    // Сначала вызываем оператор базового класса
     fs << static_cast<const IndependentPublicationCard&>(card);
     if (fs.fail()) return fs;
 
-    // Затем записываем массив статей
     fs.write(reinterpret_cast<const char*>(&card.articleCount), sizeof(card.articleCount));
 
-    for (int i = 0; i < card.articleCount; i++) {
-
+    for (int i = 0; i < card.articleCount; i++)
+    {
         const ArticleCard& articleCard = card.articleCards[i];
         fs << articleCard;  // Теперь компилятор понимает тип
         if (fs.fail()) return fs;
@@ -128,30 +126,27 @@ std::fstream& operator<<(std::fstream& fs, const ArticleCollectionCard& card)
 // Бинарный ввод
 std::fstream& operator>>(std::fstream& fs, ArticleCollectionCard& card)
 {
-    // Сначала вызываем оператор базового класса
     fs >> static_cast<IndependentPublicationCard&>(card);
     if (fs.fail()) return fs;
 
-    // Затем читаем количество статей
     int count;
     fs.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (fs.fail() || fs.eof() || count < 0 || count > 10000) { // разумные пределы
+    if (fs.fail() || fs.eof() || count < 0 || count > 10000)
+    {
         fs.setstate(std::ios::failbit);
         return fs;
     }
 
-    // Освобождаем старую память если нужно
     delete[] card.articleCards;
 
-    // Выделяем новую память
     card.articleCards = new ArticleCard[count];
     card.articleCount = count;
     card.capacity = count;
 
     for (int i = 0; i < count; i++) {
         fs >> card.articleCards[i];
-        if (fs.fail()) {
-            // В случае ошибки освобождаем память и выходим
+        if (fs.fail())
+        {
             delete[] card.articleCards;
             card.articleCards = nullptr;
             card.articleCount = 0;
@@ -163,17 +158,17 @@ std::fstream& operator>>(std::fstream& fs, ArticleCollectionCard& card)
     return fs;
 }
 
+
 // Текстовый вывод
 std::ofstream& operator<<(std::ofstream& ofs, const ArticleCollectionCard& card)
 {
-    // Сначала вызываем оператор базового класса
     ofs << static_cast<const IndependentPublicationCard&>(card);
 
-    // Затем записываем массив статей
     ofs << card.articleCount << "\n";
-    for (int i = 0; i < card.articleCount; i++) {
+    for (int i = 0; i < card.articleCount; i++)
+    {
         const ArticleCard& articleCard = card.articleCards[i];
-        ofs << articleCard;  // Теперь компилятор понимает тип
+        ofs << articleCard;
     }
 
     return ofs;
@@ -182,25 +177,20 @@ std::ofstream& operator<<(std::ofstream& ofs, const ArticleCollectionCard& card)
 // Текстовый ввод
 std::ifstream& operator>>(std::ifstream& ifs, ArticleCollectionCard& card)
 {
-    // Сначала вызываем оператор базового класса
     ifs >> static_cast<IndependentPublicationCard&>(card);
 
-    // Затем читаем массив статей
     int count;
     ifs >> count;
     ifs.ignore(); // пропускаем \n
 
-    // Освобождаем старую память если нужно
     delete[] card.articleCards;
 
-    // Выделяем новую память
     card.articleCards = new ArticleCard[count];
     card.articleCount = count;
     card.capacity = count;
 
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
         ifs >> card.articleCards[i];
-    }
 
     return ifs;
 }
