@@ -1,6 +1,7 @@
 #include "library_manager.h"
 #include <windows.h>
 #include <filesystem>
+#include <algorithm>
 
 template<class T>
 LibraryManager<T>::LibraryManager(const std::string& name) : className(name)
@@ -16,15 +17,15 @@ void LibraryManager<T>::_displayMenu() const
     std::cin.get();
     system("cls");
     std::cout  << "\n=== РАБОТА С " << className << " ==="
-              << "\n1. Добавить карточку"
-              << "\n2. Найти карточку по нескольким полям"
-              << "\n3. Вывести отсортированное по возрастанию дерево"
-              << "\n4. Вывести отсортированное по убыванию дерево"
-              << "\n5. Удалить узел с заданной характеристикой"
-              << "\n6. Вывести дерево (pre-order)"
-              << "\n7. Поиск по условию (find_if)"
-              << "\n8. Операции с файлами"
-              << "\n9. Вернуться в главное меню"
+               << "\n1. Добавить карточку"
+               << "\n2. Найти карточку по нескольким полям"
+               << "\n3. Вывести отсортированное по возрастанию дерево"
+               << "\n4. Вывести отсортированное по убыванию дерево"
+               << "\n5. Удалить узел с заданной характеристикой"
+               << "\n6. Вывести дерево (pre-order)"
+               << "\n7. Поиск по условию (find_if)"
+               << "\n8. Операции с файлами"
+               << "\n9. Вернуться в главное меню"
                << "\n\nВаш выбор: ";
 }
 
@@ -39,7 +40,7 @@ int LibraryManager<T>::_getUserChoice()
         std::cin.ignore(10000, '\n');
         throw std::runtime_error("Неверный ввод. Пожалуйста, введите число.");
     }
-    std::cin.ignore(10000, '\n'); // Очищаем буфер после ввода числа
+    std::cin.ignore(10000, '\n');
     return choice;
 }
 
@@ -72,73 +73,71 @@ void LibraryManager<T>::_processChoice(int choice)
         case 1: // Добавить карточку
         {
             T card;
-            std::cout  << "\n=== ДОБАВЛЕНИЕ КАРТОЧКИ ==="  << std::endl;
+            std::cout << "\n=== ДОБАВЛЕНИЕ КАРТОЧКИ ===" << std::endl;
 
             try
             {
                 std::cin >> card;
                 tree.push(card);
-                std::cout << " Карточка успешно добавлена!" << std::endl;
+                std::cout << "Карточка успешно добавлена!" << std::endl;
             }
             catch (const author_validation_exception& e)
             {
-                std::cout  << e.get_error_code() << ": Ошибка ввода автора: " << e.what()  << std::endl;
+                std::cout << e.get_error_code() << ": Ошибка ввода автора: " << e.what() << std::endl;
             }
             catch (const title_validation_exception& e)
             {
-                std::cout  << e.get_error_code() << ": Ошибка ввода названия: " << e.what()  << std::endl;
+                std::cout << e.get_error_code() << ": Ошибка ввода названия: " << e.what() << std::endl;
             }
             catch (const word_validation_exception& e)
             {
-                std::cout  << e.get_error_code() << ": Ошибка ввода данных: " << e.what()  << std::endl;
+                std::cout << e.get_error_code() << ": Ошибка ввода данных: " << e.what() << std::endl;
             }
             catch (const number_validation_exception& e)
             {
-                std::cout << e.get_error_code() << ": Ошибка ввода числового значения: " << e.what()  << std::endl;
+                std::cout << e.get_error_code() << ": Ошибка ввода числового значения: " << e.what() << std::endl;
             }
             catch (const std::exception& e)
             {
-                std::cout  << " Ошибка при добавлении карточки: " << e.what()  << std::endl;
+                std::cout << "Ошибка при добавлении карточки: " << e.what() << std::endl;
             }
 
-            std::cout  << "\nНажмите Enter для продолжения..." ;
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
 
         case 2: // Поиск по образцу
         {
-            auto search_template = _create_search_template();
+            SearchTemplate search_template = _create_search_template();
 
             if (!search_template.hasCriteria())
             {
-                std::cout << "Не задано ни одного критерия поиска!"  << std::endl;
+                std::cout << "Не задано ни одного критерия поиска!" << std::endl;
                 break;
             }
 
-            auto result = _search_by_template(search_template);
-            if (result)
+            auto it = _search_by_template(search_template);
+            if (it != tree.end())
             {
                 std::cout << "Найдено!" << std::endl;
-                std::cout << result->getData() << std::endl;
+                std::cout << *it << std::endl;
             }
             else
-            {
                 std::cout << "Не найдено!" << std::endl;
-            }
 
-            std::cout << "\nНажмите Enter для продолжения..." ;
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
 
         case 3: // Вывод по возрастанию
         {
-            std::cout  << "\n=== ДЕРЕВО (ПО ВОЗРАСТАНИЮ) ===" << std::endl;
+            std::cout << "\n=== ДЕРЕВО (ПО ВОЗРАСТАНИЮ) ===" << std::endl;
             T card;
             card.hat(std::cout);
-            tree.printSortedAscending();
-
+            auto alg = tree.get_algorithms();
+            alg.print_sorted_ascending(tree.begin(), tree.end());
             std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
@@ -146,12 +145,12 @@ void LibraryManager<T>::_processChoice(int choice)
 
         case 4: // Вывод по убыванию
         {
-            std::cout << "\n=== ДЕРЕВО (ПО УБЫВАНИЮ) ==="  << std::endl;
+            std::cout << "\n=== ДЕРЕВО (ПО УБЫВАНИЮ) ===" << std::endl;
             T card;
             card.hat(std::cout);
-            tree.printSortedDescending();
-
-            std::cout<< "\nНажмите Enter для продолжения..." ;
+            auto alg = tree.get_algorithms();
+            alg.print_sorted_descending(tree.rbegin(), tree.rend());
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
@@ -160,97 +159,107 @@ void LibraryManager<T>::_processChoice(int choice)
         {
             try
             {
-                auto search_template = _create_search_template();
+                SearchTemplate search_template = _create_search_template();
 
                 if (!search_template.hasCriteria())
                 {
-                    std::cout<< "Не задано ни одного критерия поиска!" << std::endl;
+                    std::cout << "Не задано ни одного критерия поиска!" << std::endl;
                     break;
                 }
 
-                auto result = _search_by_template(search_template);
-                if (result)
+                auto it = _search_by_template(search_template);
+                if (it != tree.end())
                 {
-                    tree.remove(result->getData());
-                    std::cout  << " Узел удален!"<< std::endl;
+                    // Получаем значение для удаления
+                    T value_to_remove = *it;
+                    if (tree.remove(value_to_remove))
+                        std::cout << "Узел удален!" << std::endl;
+                    else
+                        std::cout << "Ошибка при удалении узла!" << std::endl;
                 }
                 else
                 {
-                    std::cout  << " Узел не найден!"  << std::endl;
+                    std::cout << "Узел не найден!" << std::endl;
                 }
             }
             catch (const std::exception& e)
             {
-                std::cout  << "Ошибка при удалении узла: " << e.what()  << std::endl;
+                std::cout << "Ошибка при удалении узла: " << e.what() << std::endl;
             }
 
-            std::cout << "\nНажмите Enter для продолжения..." ;
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
 
-        case 6: // Вывод дерева в pre-order
+        case 6: // Вывод дерева (обход in-order)
         {
-            std::cout  << "\n=== ДЕРЕВО (PRE-ORDER) ===" << std::endl;
+            std::cout << "\n=== ДЕРЕВО (IN-ORDER) ===" << std::endl;
             T card;
             card.hat(std::cout);
-            tree.printTree();
 
-            std::cout  << "\nНажмите Enter для продолжения..." ;
+            // Просто используем итераторы для вывода (in-order)
+            for (auto it = tree.begin(); it != tree.end(); ++it)
+                std::cout << *it;
+
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
 
         case 7: // Поиск по любому полю
         {
-            std::cout  << "\n=== ПОИСК ПО ЛЮБОМУ ПОЛЮ ==="  << std::endl;
-            std::cout  << "Введите значение для поиска: ";
+            std::cout << "\n=== ПОИСК ПО ЛЮБОМУ ПОЛЮ ===" << std::endl;
+            std::cout << "Введите значение для поиска: ";
             std::string searchValue;
             std::getline(std::cin, searchValue);
 
-            auto result = tree.find_if([&searchValue](const T& card)
-                                       {
-                                           if (card.getTitle() == searchValue ||
-                                               card.getAuthor() == searchValue ||
-                                               card.getInventoryNumber() == searchValue ||
-                                               card.getThematicCode() == searchValue)
-                                               return true;
+            auto it = tree.find_if([&searchValue](const T& card) -> bool {
+                // Проверка строковых полей
+                if (card.getTitle() == searchValue ||
+                    card.getAuthor() == searchValue ||
+                    card.getInventoryNumber() == searchValue ||
+                    card.getThematicCode() == searchValue)
+                    return true;
 
-                                           if (dynamic_cast<const ArticleCard*>(&card) != nullptr)
-                                               return false;
+                // Для ArticleCard дальше не проверяем
+                if (dynamic_cast<const ArticleCard*>(&card))
+                    return false;
 
-                                           const auto* independentCard = dynamic_cast<const IndependentPublicationCard*>(&card);
-                                           if (independentCard)
-                                           {
-                                               if (independentCard && independentCard->getPublisher() == searchValue)
-                                                   return true;
+                // Для IndependentPublicationCard проверяем дополнительные поля
+                const auto* independentCard = dynamic_cast<const IndependentPublicationCard*>(&card);
+                if (independentCard)
+                {
+                    if (independentCard->getPublisher() == searchValue)
+                        return true;
 
-                                               try
-                                               {
-                                                   int numValue = std::stoi(searchValue);
-                                                   if (independentCard && (independentCard->getYearOfPublication() == numValue ||
-                                                                           independentCard->getCirculation() == numValue ||
-                                                                           independentCard->getPagesNamber() == numValue))
-                                                       return true;
-                                               }
-                                               catch (const std::exception&) {
-                                                   // Игнорируем ошибки преобразования строки в число
-                                               }
-                                           }
-                                           return false;
-                                       });
+                    // Пробуем преобразовать в число
+                    try
+                    {
+                        int numValue = std::stoi(searchValue);
+                        if (independentCard->getYearOfPublication() == numValue ||
+                            independentCard->getCirculation() == numValue ||
+                            independentCard->getPagesNamber() == numValue)
+                            return true;
+                    }
+                    catch (const std::exception&) {
+                        // Не число - игнорируем
+                    }
+                }
+                return false;
+            });
 
-            if (result)
+            if (it != tree.end())
             {
-                std::cout  << " Найдено!"  << std::endl;
-                std::cout << result->getData() << std::endl;
+                std::cout << "Найдено!" << std::endl;
+                std::cout << *it << std::endl;
             }
             else
             {
-                std::cout  << " Не найдено!"  << std::endl;
+                std::cout << "Не найдено!" << std::endl;
             }
 
-            std::cout  << "\nНажмите Enter для продолжения..." ;
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
         }
@@ -261,12 +270,12 @@ void LibraryManager<T>::_processChoice(int choice)
             do
             {
                 system("cls");
-                std::cout << "\n=== ОПЕРАЦИИ С ФАЙЛАМИ ===" << "\033[0m"
+                std::cout << "\n=== ОПЕРАЦИИ С ФАЙЛАМИ ==="
                           << "\n1. Запись в текстовый файл"
                           << "\n2. Чтение из текстового файла"
                           << "\n3. Запись в бинарный файл"
                           << "\n4. Чтение из бинарного файла"
-                          << "\n5. Возврат в меню " << className << "\n\nВаш выбор: \033[0m";
+                          << "\n5. Возврат в меню " << className << "\n\nВаш выбор: ";
 
                 fileChoice = _getUserChoice();
 
@@ -285,17 +294,15 @@ void LibraryManager<T>::_processChoice(int choice)
                         _readFromBinaryFile();
                         break;
                     case 5:
-                        std::cout  << "Возврат в меню " << className << "..." << std::endl;
+                        std::cout << "Возврат в меню " << className << "..." << std::endl;
                         break;
                     default:
-                        std::cout  << "Неверный выбор!"  << std::endl;
+                        std::cout << "Неверный выбор!" << std::endl;
                 }
 
                 if (fileChoice != 5)
                 {
-                    std::cout << "\033[36m" << "\n\nНажмите Enter для продолжения..." << "\033[0m";
-                    std::cin.get();
-
+                    std::cout << "\nНажмите Enter для продолжения...";
                     std::cin.get();
                 }
 
@@ -304,19 +311,18 @@ void LibraryManager<T>::_processChoice(int choice)
         }
 
         case 9: // Выход в главное меню
-            std::cout  << " Возврат в главное меню..." << std::endl;
+            std::cout << "Возврат в главное меню..." << std::endl;
             std::cin.get();
             break;
 
         default:
-            std::cout  <<  "Неверный выбор!" << std::endl;
-            std::cout  << "\nНажмите Enter для продолжения..." ;
+            std::cout << "Неверный выбор!" << std::endl;
+            std::cout << "\nНажмите Enter для продолжения...";
             std::cin.get();
             break;
     }
 }
 
-// Реализации ваших оригинальных методов
 template<class T>
 std::function<bool(const T&, const T&)> LibraryManager<T>::_choose_comparator()
 {
@@ -335,8 +341,7 @@ std::function<bool(const T&, const T&)> LibraryManager<T>::_choose_comparator()
                   << "\n8. По количеству страниц";
     }
 
-    std::cout
-               << "\n\nВаш выбор: ";
+    std::cout << "\n\nВаш выбор: ";
 
     if (!(std::cin >> sortChoice))
     {
@@ -420,74 +425,80 @@ template<class T>
 SearchTemplate LibraryManager<T>::_create_search_template()
 {
     SearchTemplate search_template;
-    std::cin.ignore();
 
-    std::cout << "\n=== СОЗДАНИЕ ОБРАЗЦА ДЛЯ ПОИСКА ===" <<std::endl;
-    std::cout << "Заполните поля для поиска (оставьте пустыми или 0 для пропуска):" << std::endl;
+    std::cout << "\n=== СОЗДАНИЕ ОБРАЗЦА ДЛЯ ПОИСКА ===" << std::endl;
+    std::cout << "Заполните поля для поиска (оставьте пустыми для пропуска):" << std::endl;
 
-    std::cout << "Введите название (оставьте пустым для пропуска): ";
+    std::cout << "Введите название: ";
     std::string title;
     std::getline(std::cin, title);
     search_template.setTitle(title);
 
-    std::cout << "Введите автора (оставьте пустым для пропуска): ";
+    std::cout << "Введите автора: ";
     std::string author;
     std::getline(std::cin, author);
     search_template.setAuthor(author);
 
-    std::cout << "Введите авторский код (оставьте пустым для пропуска): ";
+    std::cout << "Введите авторский код: ";
     std::string authorCode;
     std::getline(std::cin, authorCode);
     search_template.setAuthorMark(authorCode);
 
-    std::cout << "Введите инвентарный номер (оставьте пустым для пропуска): ";
+    std::cout << "Введите инвентарный номер: ";
     std::string inventory;
     std::getline(std::cin, inventory);
     search_template.setInventoryNumber(inventory);
 
-    std::cout << "Введите тематический код (оставьте пустым для пропуска): ";
+    std::cout << "Введите тематический код: ";
     std::string thematic;
     std::getline(std::cin, thematic);
     search_template.setThematicCode(thematic);
 
     // Для производных классов добавляем дополнительные поля
-    if (className != "ArticleCard") {
-        std::cout << "Введите год издания (0 для пропуска): ";
+    if (className != "ArticleCard")
+    {
+        std::cout << "Введите год издания: ";
         std::string yearStr;
         std::getline(std::cin, yearStr);
-        try {
-            if (!yearStr.empty()) {
+        if (!yearStr.empty())
+        {
+            try {
                 search_template.setYearOfPublication(std::stoi(yearStr));
             }
-        } catch (...) {
-            std::cout << "Некорректный год, поле будет пропущено" << std::endl;
+            catch (...) {
+                std::cout << "Некорректный год, поле будет пропущено" << std::endl;
+            }
         }
 
-        std::cout << "Введите издателя (оставьте пустым для пропуска): ";
+        std::cout << "Введите издателя: ";
         std::string publisher;
         std::getline(std::cin, publisher);
         search_template.setPublisher(publisher);
 
-        std::cout << "Введите тираж (0 для пропуска): ";
+        std::cout << "Введите тираж: ";
         std::string circulationStr;
         std::getline(std::cin, circulationStr);
-        try {
-            if (!circulationStr.empty()) {
+        if (!circulationStr.empty())
+        {
+            try {
                 search_template.setCirculation(std::stoi(circulationStr));
             }
-        } catch (...) {
-            std::cout  << "Некорректный тираж, поле будет пропущено" << std::endl;
+            catch (...) {
+                std::cout << "Некорректный тираж, поле будет пропущено" << std::endl;
+            }
         }
 
-        std::cout << "Введите количество страниц (0 для пропуска): ";
+        std::cout << "Введите количество страниц: ";
         std::string pagesStr;
         std::getline(std::cin, pagesStr);
-        try {
-            if (!pagesStr.empty()) {
+        if (!pagesStr.empty())
+        {
+            try {
                 search_template.setPagesNamber(std::stoi(pagesStr));
             }
-        } catch (...) {
-            std::cout  << "Некорректное количество страниц, поле будет пропущено" << std::endl;
+            catch (...) {
+                std::cout << "Некорректное количество страниц, поле будет пропущено" << std::endl;
+            }
         }
     }
 
@@ -495,10 +506,10 @@ SearchTemplate LibraryManager<T>::_create_search_template()
 }
 
 template<class T>
-treeNode<T>* LibraryManager<T>::_search_by_template(const SearchTemplate& search_template)
+typename binaryTree<T>::iterator LibraryManager<T>::_search_by_template(const SearchTemplate& search_template)
 {
-    return tree.find_if([&search_template, this](const T& card) {
-        // Проверка базовых полей LibraryCard
+    return tree.find_if([&search_template, this](const T& card) -> bool {
+        // Проверка базовых полей
         if (!search_template.getTitle().empty() && card.getTitle() != search_template.getTitle())
             return false;
         if (!search_template.getAuthor().empty() && card.getAuthor() != search_template.getAuthor())
@@ -511,7 +522,7 @@ treeNode<T>* LibraryManager<T>::_search_by_template(const SearchTemplate& search
             return false;
 
         // Для ArticleCard поиск завершается на базовых полях
-        if (dynamic_cast<const ArticleCard*>(&card) != nullptr)
+        if (typeid(card) == typeid(ArticleCard) || dynamic_cast<const ArticleCard*>(&card))
             return true;
 
         // Проверка полей IndependentPublicationCard
@@ -522,24 +533,24 @@ treeNode<T>* LibraryManager<T>::_search_by_template(const SearchTemplate& search
 template<class T>
 bool LibraryManager<T>::_search_independent_fields(const SearchTemplate& search_template, const T& card)
 {
-    const IndependentPublicationCard* indCard = dynamic_cast<const IndependentPublicationCard*>(&card);
-    if (!indCard)
-        return true;
+    const auto* independentCard = dynamic_cast<const IndependentPublicationCard*>(&card);
+    if (!independentCard)
+        return false;
 
     if (!search_template.getPublisher().empty() &&
-        indCard->getPublisher() != search_template.getPublisher())
+        independentCard->getPublisher() != search_template.getPublisher())
         return false;
 
     if (search_template.getYearOfPublication() != 0 &&
-        indCard->getYearOfPublication() != search_template.getYearOfPublication())
+        independentCard->getYearOfPublication() != search_template.getYearOfPublication())
         return false;
 
     if (search_template.getCirculation() != 0 &&
-        indCard->getCirculation() != search_template.getCirculation())
+        independentCard->getCirculation() != search_template.getCirculation())
         return false;
 
     if (search_template.getPagesNamber() != 0 &&
-        indCard->getPagesNamber() != search_template.getPagesNamber())
+        independentCard->getPagesNamber() != search_template.getPagesNamber())
         return false;
 
     return true;
@@ -562,7 +573,13 @@ void LibraryManager<T>::_writeToTextFile()
 
         file_txt.Open_file_out();
 
-        std::vector<T> sortedData = tree.getSortedAscending();
+        // Собираем данные через итераторы
+        std::vector<T> sortedData;
+        for (auto it = tree.begin(); it != tree.end(); ++it)
+        {
+            sortedData.push_back(*it);
+        }
+
         if (sortedData.empty())
         {
             std::cout << "\033[33m" << "Нет данных для записи" << "\033[0m" << std::endl;
@@ -703,7 +720,13 @@ void LibraryManager<T>::_writeToBinaryFile()
             throw std::runtime_error("Неизвестный тип карточки для менеджера: " + className);
 
         int type_code = static_cast<int>(expected_type);
-        std::vector<T> sortedData = tree.getSortedAscending();
+
+        // Собираем данные через итераторы
+        std::vector<T> sortedData;
+        for (auto it = tree.begin(); it != tree.end(); ++it)
+        {
+            sortedData.push_back(*it);
+        }
 
         if (sortedData.empty())
         {
@@ -716,8 +739,8 @@ void LibraryManager<T>::_writeToBinaryFile()
 
         for (auto& card : sortedData)
         {
-            file_bin << type_code;      // Записываем тип карточки
-            file_bin << card;           // Записываем саму карточку
+            file_bin << type_code;
+            file_bin << card;
         }
 
         std::cout << "\033[32m" << "Данные успешно записаны в бинарный файл: " << filename
@@ -783,6 +806,13 @@ void LibraryManager<T>::_readFromBinaryFile()
                 cardsAdded++;
                 std::cout << "\033[33m" << "Загружена карточка #" << cardsAdded << "\033[0m" << std::endl;
             }
+                // Сначала ловим file_format_exception (более специфичный)
+            catch (const file_format_exception& e)
+            {
+                std::cout << "\033[31m" << e.get_error_code() << ": " << e.what() << "\033[0m" << std::endl;
+                break;
+            }
+                // Затем ловим runtime_error (более общий)
             catch (const std::runtime_error& e)
             {
                 // Конец файла - нормальный выход
@@ -792,11 +822,6 @@ void LibraryManager<T>::_readFromBinaryFile()
                     break;
                 hasError = true;
                 errorMessage = e.what();
-                break;
-            }
-            catch (const file_format_exception& e)
-            {
-                std::cout << "\033[31m" << e.get_error_code() << ": " << e.what() << "\033[0m" << std::endl;
                 break;
             }
         }
@@ -838,7 +863,6 @@ CardType LibraryManager<T>::_get_card_type()
     if (className == "BookCard") return BOOK_CARD;
     if (className == "ArticleCard") return ARTICLE_CARD;
     return UNKNOWN;
-
 }
 
 template<class T>

@@ -77,8 +77,7 @@ private:
     int _getUserChoice();
     void _processChoice(int choice);
 
-    treeNode<T>* _search_by_template(const SearchTemplate& search_template);
-    SearchTemplate _create_search_template();
+    typename binaryTree<T>::iterator _search_by_template(const SearchTemplate& search_template);    SearchTemplate _create_search_template();
     bool _search_independent_fields(const SearchTemplate& search_template, const T& card);
 
     std::function<bool(const T&, const T&)> _choose_comparator();

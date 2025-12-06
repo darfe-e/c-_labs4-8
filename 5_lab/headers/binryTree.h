@@ -1,61 +1,71 @@
-#ifndef INC_4_LAB_BINRYTREE_H                    // Защита от многократного включения
-#define INC_4_LAB_BINRYTREE_H                    // Определение макроса для данного заголовочного файла
+#ifndef BINARY_TREE_H
+#define BINARY_TREE_H
 
-#include "treeNode.h"                             // Включение заголовочного файла для узла дерева
-#include <iostream>                               // Включение библиотеки ввода-вывода
-#include <type_traits>                            // Включение библиотеки для работы с типами
-#include <vector>                                 // Включение библиотеки для работы с векторами
+#include "treeNode.h"
+#include "tree_iterator.h"
+#include "reverse_tree_iterator.h"
+#include "tree_algorithms.h"
 #include <functional>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
 
-template <typename T>                             // Шаблонный класс бинарного дерева
+template <typename T>
 class binaryTree
 {
 private:
-    treeNode<T>* root;                                  // Указатель на корневой узел дерева
-    std::function<bool(const T&, const T&)> comparator; // Компаратор
+    treeNode<T>* root;
+    std::function<bool(const T&, const T&)> comparator;
 
 public:
-    binaryTree() : root(nullptr),
-            comparator([](const T& a, const T& b) { return a < b; }) {}
-    binaryTree(std::function<bool(const T&, const T&)> comp)
-            : root(nullptr), comparator(comp) {}
-    ~binaryTree();                                // Деструктор для очистки памяти
+    using iterator = tree_iterator<T>;
+    using reverse_iterator = reverse_tree_iterator<T>;
 
-    void push(T value);                           // Метод для добавления элемента в дерево
-    treeNode<T>* remove(T value);                 // Метод для удаления элемента из дерева
-    void printTree();                             // Метод для вывода дерева
+    binaryTree();
+    binaryTree(std::function<bool(const T&, const T&)> comp);
+    ~binaryTree();
 
-    template<typename SV>                         // Шаблонный метод для поиска по любому типу
-    treeNode<T>* find(const SV& value);           // Поиск элемента в дереве
+    iterator begin();
+    iterator end();
 
-    std::vector<T> getSortedAscending();          // Получение элементов в отсортированном порядке (возрастание)
-    std::vector<T> getSortedDescending();         // Получение элементов в отсортированном порядке (убывание)
-    void printSortedAscending();                  // Вывод элементов по возрастанию
-    void printSortedDescending();                 // Вывод элементов по убыванию
+    reverse_iterator rbegin()
+    {
+        treeNode<T>* rightmost = root;
+        if (rightmost != nullptr)
+            while (rightmost->right != nullptr)
+                rightmost = rightmost->right;
+        return reverse_iterator(rightmost, root);
+    }
 
-    template<typename Predicate>                  // Шаблонный метод для поиска по предикату
-    treeNode<T>* find_if(Predicate pred);         // Поиск элемента, удовлетворяющего условию
+    reverse_iterator rend(){ return reverse_iterator(nullptr, root); }
 
-    template<typename U>                          // Объявление дружественной функции вывода
-    friend std::ostream& operator<<(std::ostream& os, const binaryTree<U>& tree); // Перегрузка оператора вывода
+    void push(const T& value);
+    bool remove(const T& value);
+    void clear();
+    bool empty() const;
+    size_t size() const;
+
+    template<typename Predicate>
+    iterator find_if(Predicate pred);
+
+    void printTree() const;
+    tree_algorithms<T> get_algorithms();
+
+    template<typename U>
+    friend std::ostream& operator<<(std::ostream& os, const binaryTree<U>& tree);
 
 private:
-    void insert(treeNode<T>* node, treeNode<T>* newNode);     // Вспомогательный метод для вставки узла
-    treeNode<T>* removeRecursive(treeNode<T>* node, T value); // Рекурсивное удаление узла
-    treeNode<T>* findMin(treeNode<T>* node);                  // Поиск минимального элемента в поддереве
-    void printRecursive(treeNode<T>* node) const;             // Рекурсивный вывод дерева (константный метод)
+    treeNode<T>* insert(treeNode<T>* node, treeNode<T>* parent, const T& value);
+    treeNode<T>* findMinNode(treeNode<T>* node) const;
+    void clearRecursive(treeNode<T>* node);
+    size_t sizeRecursive(treeNode<T>* node) const;
 
-    template<typename SV>                                     // Шаблонный рекурсивный поиск
-    treeNode<T>* findRecursive(treeNode<T>* node, const SV& value); // Рекурсивный поиск элемента
+    template<typename Predicate>
+    treeNode<T>* findIfRecursive(treeNode<T>* node, Predicate pred) const;
 
-    template<typename Predicate>                              // Шаблонный рекурсивный поиск по предикату
-    treeNode<T>* findIfRecursive(treeNode<T>* node, Predicate pred); // Рекурсивный поиск по условию
-
-    void clearRecursive(treeNode<T>* node);                   // Рекурсивная очистка памяти дерева
-
-    void inOrderTraversal(treeNode<T>* node, std::vector<T>& result);        // Обход дерева в порядке возрастания
-    void reverseInOrderTraversal(treeNode<T>* node, std::vector<T>& result); // Обход дерева в порядке убывания
+    void printRecursive(treeNode<T>* node, int depth = 0) const;
 };
 
-#include "D:\study\2_year\pnaiavy\c-_labs4-8\5_lab\source\binryTree.tpp"
-#endif //INC_4_LAB_BINRYTREE_H                    // Конец защитного блока
+#include "../source/binryTree.tpp"
+
+#endif // BINARY_TREE_H

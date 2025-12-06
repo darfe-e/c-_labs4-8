@@ -10,3 +10,7 @@ CMakeLists.txt
 # Keep only main.cpp 
 !main.cpp 
 
+# Объектные файлы
+*.o
+*.obj
+
